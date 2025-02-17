@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "157416501379",
+    "project_id": "tfsappsai",
+    "storage_bucket": "tfsappsai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157416501379:android:dd199c8eff0d4ee53cebb6",
+        "android_client_info": {
+          "package_name": "tfsapps.insectsearch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6AsHfJ6MdvCDCvRCfNeuExh8TNU4qcEQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157416501379:android:a08d57b49891c63d3cebb6",
+        "android_client_info": {
+          "package_name": "tfsapps.smilechecker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6AsHfJ6MdvCDCvRCfNeuExh8TNU4qcEQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
