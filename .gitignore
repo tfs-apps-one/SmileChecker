@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Firebase設定ファイルをGit管理から除外
+app/google-services.json
