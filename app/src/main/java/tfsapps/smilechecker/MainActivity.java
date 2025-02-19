@@ -1,4 +1,6 @@
 package tfsapps.smilechecker;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -7,7 +9,10 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,6 +20,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetection;
@@ -38,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
 
         imageView = findViewById(R.id.imageView);
@@ -58,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             imageView.setImageURI(imageUri);
+            showProgressDialog(this);
             analyzeImage();
             detectFaces();
         }
@@ -228,6 +237,33 @@ public class MainActivity extends AppCompatActivity {
 
         return emotionMessage;
     }
+
+    //進捗ダイアログ
+    public static void showProgressDialog(Context context) {
+//        public static void showProgressDialog(Context context, String title, String message) {
+        // カスタムレイアウトを作成
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(R.layout.dialog, null);
+
+        String title = "【AI】";
+        String message = "\n\n\n画像解析中．．．\n\n\n";
+
+        // ダイアログを作成
+        AlertDialog progressDialog = new AlertDialog.Builder(context)
+                .setTitle(title)         // タイトルを追加
+                .setMessage(message)     // メッセージを追加
+                .setView(view)           // ProgressBar をセット
+                .setCancelable(false)    // 手動で閉じられないようにする
+                .create();
+
+        // ダイアログを表示
+        progressDialog.show();
+
+        // 0.5秒後にダイアログを閉じる
+        new Handler().postDelayed(progressDialog::dismiss, 1500);
+    }
+
+
     /*
     private String getEmotion(Face face) {
         String emotionMessage = "Neutral";  // 初期値は「中立」
