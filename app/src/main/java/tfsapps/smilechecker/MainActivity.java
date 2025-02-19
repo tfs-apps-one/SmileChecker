@@ -42,6 +42,12 @@ public class MainActivity extends AppCompatActivity {
     private Uri imageUri;
     private Bitmap _bitmap = null;
 
+    private int human_num = 0;
+    private int smile_num = 0;
+    private int angry_num = 0;
+    private int sad_num = 0;
+    private int curious_num = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
             imageUri = data.getData();
             imageView.setImageURI(imageUri);
             showProgressDialog(this);
+            ResetSmileCheckerNum();
             analyzeImage();
             detectFaces();
         }
@@ -96,7 +103,8 @@ public class MainActivity extends AppCompatActivity {
             String labelText = label.getText(); // 昆虫の名前
             float confidence = label.getConfidence(); // 信頼度 (0.0 - 1.0)
 
-            if (confidence > 0.7) { // 信頼度が70%以上のものだけ表示
+            //test_make  default = 0.7
+            if (confidence > 0.5) { // 信頼度が70%以上のものだけ表示
                 resultText.append(labelText).append(" (").append(String.format("%.1f", confidence * 100)).append("%)\n");
             }
         }
@@ -187,11 +195,87 @@ public class MainActivity extends AppCompatActivity {
                     imageView.setImageBitmap(mutableBitmap); // 枠付き画像をセット
 
                     int faceCount = faces.size(); // 検出した顔の数
+                    human_num = faceCount;
+                    ResultSmile();
                     Toast.makeText(this, "検出した人数: " + faceCount + "人", Toast.LENGTH_LONG).show();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "顔を検出できませんでした", Toast.LENGTH_LONG).show();
                 });
+    }
+
+    //パラメータ初期化
+    public void ResetSmileCheckerNum(){
+        human_num = 0;
+        smile_num = 0;
+        angry_num = 0;
+        sad_num = 0;
+        curious_num = 0;
+    }
+
+    //笑顔表記
+    public void ResultSmile(){
+
+        TextView face_result = findViewById(R.id.faceResult);
+        ImageView star_1 = findViewById(R.id.result_1);
+        ImageView star_2 = findViewById(R.id.result_2);
+        ImageView star_3 = findViewById(R.id.result_3);
+        String message = "";
+
+        float _percent = 0;
+        float _smile = 0;
+        float _human = 0;
+
+        if (human_num > 0 && smile_num > 0){
+
+            _smile = (float)smile_num;
+            _human = (float)human_num;
+
+            _percent = (_smile / _human);
+
+            if (human_num == smile_num || _percent >= 1.0){
+                message = "満点の【スマイル】です";
+
+                star_1.setImageResource(R.drawable.star_ok);
+                star_2.setImageResource(R.drawable.star_ok);
+                star_3.setImageResource(R.drawable.star_ok);
+            }
+            else if(_percent >= 0.5){
+                message = "多くの【スマイル】があります";
+
+                star_1.setImageResource(R.drawable.star_ok);
+                star_2.setImageResource(R.drawable.star_ok);
+                star_3.setImageResource(R.drawable.star_ng2);
+            }
+            else{
+                message = "少しの【スマイル】があります";
+
+                star_1.setImageResource(R.drawable.star_ok);
+                star_2.setImageResource(R.drawable.star_ng2);
+                star_3.setImageResource(R.drawable.star_ng2);
+            }
+        }
+        else{
+            if (human_num == 0) {
+                message = "【人を検知できません】";
+            }
+            else{
+                message = "【スマイル】がないかな？";
+            }
+            star_1.setImageResource(R.drawable.star_ng2);
+            star_2.setImageResource(R.drawable.star_ng2);
+            star_3.setImageResource(R.drawable.star_ng2);
+        }
+        //共通部分
+        message +=
+                "\n"+
+                "\n　人の検出　："+human_num+
+                "\n　スマイル　："+smile_num+
+                "\n　悲しい　　："+sad_num+
+                "\n　怒り・立腹："+angry_num+
+                "\n　興味・困惑："+curious_num+
+                "\n";
+                face_result.setText(message);
     }
 
 
@@ -209,9 +293,17 @@ public class MainActivity extends AppCompatActivity {
             } else if (smileProb > 0.5) {
                 emotionMessage = "Soft Smile";
             } else if (smileProb < 0.2) {
-                //emotionMessage = "Sad"; // ほぼ笑っていない場合は悲しみ
+//                emotionMessage = "Sad"; // ほぼ笑っていない場合は悲しみ
+//                sad_num++;
+            }
+
+            if (smileProb > 0.5){
+                smile_num++;
+                return emotionMessage;
             }
         }
+
+        // ↓↓　以下は笑顔ではない判定の時
 
         // 目の開き具合で感情を判定
         if (face.getLeftEyeOpenProbability() != null && face.getRightEyeOpenProbability() != null) {
@@ -221,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (avgEyeOpen < 0.3) {
                 emotionMessage = "Angry"; // 目を細めている → 怒り
+                angry_num++;
             } else if (avgEyeOpen > 0.9) {
                 //emotionMessage = "Surprised"; // 目を大きく見開いている → 驚き
             }
@@ -229,10 +322,12 @@ public class MainActivity extends AppCompatActivity {
         // 頭の傾きで追加判定
         if (face.getHeadEulerAngleX() > 20) {
             emotionMessage = "Sad"; // 下を向いている → 悲しみ
+            sad_num++;
         } else if (face.getHeadEulerAngleX() < -20) {
             //emotionMessage = "Confused"; // 上を向いている → 困惑
         } else if (face.getHeadEulerAngleY() > 20 || face.getHeadEulerAngleY() < -20) {
             emotionMessage = "Curious"; // 横に傾けている → 疑問・興味
+            curious_num++;
         }
 
         return emotionMessage;
@@ -240,18 +335,21 @@ public class MainActivity extends AppCompatActivity {
 
     //進捗ダイアログ
     public static void showProgressDialog(Context context) {
-//        public static void showProgressDialog(Context context, String title, String message) {
         // カスタムレイアウトを作成
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.dialog, null);
 
-        String title = "【AI】";
-        String message = "\n\n\n画像解析中．．．\n\n\n";
+        String title = "【 AI解析中... 】";
+        String message = "\n\n\n\n\n\n\nしばらくお待ちください\n\n\n\n\n\n";
+
+        // タイトルとメッセージをセット
+        TextView titleView = view.findViewById(R.id.dialogTitle);
+        TextView messageView = view.findViewById(R.id.dialogMessage);
+        titleView.setText(title);
+        messageView.setText(message);
 
         // ダイアログを作成
         AlertDialog progressDialog = new AlertDialog.Builder(context)
-                .setTitle(title)         // タイトルを追加
-                .setMessage(message)     // メッセージを追加
                 .setView(view)           // ProgressBar をセット
                 .setCancelable(false)    // 手動で閉じられないようにする
                 .create();
