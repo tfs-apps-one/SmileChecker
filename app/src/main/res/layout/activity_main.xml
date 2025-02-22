@@ -142,6 +142,7 @@
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
+                android:onClick="onInformation"
                 tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck"
                 android:padding="5dp"/>
 

@@ -62,12 +62,14 @@ public class MainActivity extends AppCompatActivity {
     private Switch SwFaceHighMark;
     private Switch SwFaceValue;
     private Switch SwFaceHighSpeed;
+    private Switch SwSelectionNum;
 
     private boolean isFaceFrame = true;
     private boolean isFaceMark = true;
     private boolean isFaceHighMark = false;
     private boolean isFaceValue = false;
     private boolean isAiHighSpeed = false;
+    private boolean isSelectNum = false;
 
     private Bitmap mutableBitmap = null;
     private TextView face_result;
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGES_REQUEST = 1;
     private ArrayList<Uri> imageUris = new ArrayList<>();
     private int currentIndex = 0;
-
+    private int MaxSelectNum = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,12 +194,18 @@ public class MainActivity extends AppCompatActivity {
             analyzeImage();
             detectFaces();
         }*/
+        if (isSelectNum){
+            MaxSelectNum = 9;
+        }
+        else{
+            MaxSelectNum = 3;
+        }
         if (requestCode == PICK_IMAGES_REQUEST && resultCode == RESULT_OK) {
             if (data != null) {
                 imageUris.clear();
                 if (data.getClipData() != null) {
                     int count = data.getClipData().getItemCount();
-                    for (int i = 0; i < count && i < 5; i++) {
+                    for (int i = 0; i < count && i < MaxSelectNum; i++) {
                         Uri imageUri = data.getClipData().getItemAt(i).getUri();
                         imageUris.add(imageUri);
                     }
@@ -403,7 +411,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else{
             if (human_num == 0) {
-                message = "【人を検知できません】";
+                message = "【顔を検出できません】";
             }
             else{
                 message = "【スマイル】がないかな？";
@@ -415,7 +423,7 @@ public class MainActivity extends AppCompatActivity {
         //共通部分
         message +=
                 "\n"+
-                "\n　人の検出　："+human_num+
+                "\n　顔の検出　："+human_num+
                 "\n　スマイル　："+smile_num+
                 "\n　悲しい　　："+sad_num+
                 "\n　怒り・立腹："+angry_num+
@@ -529,8 +537,8 @@ public class MainActivity extends AppCompatActivity {
     //スクショ確認ダイアログ
     public void showScreenShotsDialog() {
 
-        String title = "";
-        String message = "\n\n\n\n\n\n\n【スクリーンショット】として保存しますか？\n\n\n\n\n\n";
+        String title = "【スクリーンショット】";
+        String message = "\n\n\n\n\n\n\n現在の判定結果を保存しますか？\n\n\n\n\n\n";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
@@ -549,7 +557,39 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.setCancelable(false);
         builder.show();
+    }
+    //スクショ確認ダイアログ
+    public void showInformationDialog() {
 
+        String title = "【アプリの使い方】";
+        String message =
+                        "\n"+
+                        "\n【注意】"+
+                        "\nAIの判定結果は参考程度にご利用下さい。"+
+                        "\n"+
+                        "\n【使い方】"+
+                        "\nまずは画像を選択して下さい。選択後、AIが顔認識を行いスマイル度を判定します。"+
+                        "\n例えばあるシーンを複数枚撮った時、どの写真一番スマイルしているかなどを判定するのに便利です"+
+                        "\n"+
+                        "\n判定した結果はスクリーンショットとして保存することが出来ます。"+
+                        "\nアプリをもっと便利に使える設定もあります。設定画面を確認下さい。"+
+                        "\n"+
+                        "\n";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton("閉じる", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setCancelable(false);
+        builder.show();
+    }
+    public void onInformation(View v){
+        showInformationDialog();
     }
     public void ScreenShotsDone(){
         MyScreenShots.takeScreenshotAndSave(this);
@@ -573,6 +613,7 @@ public class MainActivity extends AppCompatActivity {
         SwFaceHighMark = findViewById(R.id.face_high_mark);
         SwFaceValue = findViewById(R.id.face_value);
         SwFaceHighSpeed = findViewById(R.id.ai_high_speed);
+        SwSelectionNum = findViewById(R.id.selection_num);
 
         SwFaceFrame.setChecked(isFaceFrame);
         SwFaceFrame.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -616,6 +657,15 @@ public class MainActivity extends AppCompatActivity {
                 isAiHighSpeed = true;
             } else {
                 isAiHighSpeed = false;
+            }
+        });
+
+        SwSelectionNum.setChecked(isSelectNum);
+        SwSelectionNum.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isSelectNum = true;
+            } else {
+                isSelectNum = false;
             }
         });
 

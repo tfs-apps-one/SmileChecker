@@ -165,6 +165,29 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginBottom="3dp"/>
 
+            <Switch
+                android:id="@+id/selection_num"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:text="【プレミアム】画面選択枚数増加"
+                android:padding="10sp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                />
+            <TextView
+                android:id="@+id/explan_6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="画面選択の最大数を「3→9」に拡張します"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"/>
 
         </LinearLayout>
     </ScrollView>
