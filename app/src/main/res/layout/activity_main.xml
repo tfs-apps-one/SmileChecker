@@ -33,10 +33,10 @@
         <Button
             android:id="@+id/btnChooseImage"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
             android:layout_marginStart="0dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
             android:layout_marginEnd="0dp"
             android:text="画像を選択"
             app:layout_constraintTop_toBottomOf="@+id/imageView"
@@ -85,37 +85,27 @@
             android:id="@+id/faceResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="10dp"
             android:text="結果がここに表示されます"
             android:textAlignment="center"
-            android:textSize="16dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@+id/btnChooseImage"
-            tools:layout_editor_absoluteX="16dp" />
-
-        <TextView
-            android:id="@+id/txtResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text=""
-            android:textAlignment="center"
-            android:textSize="16dp"
-            app:layout_constraintTop_toBottomOf="@+id/faceResult"
             tools:layout_editor_absoluteX="16dp" />
 
         <!-- ボタン 2段目 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:orientation="horizontal"
             android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@+id/txtResult"
-            android:layout_marginTop="8dp">
+            app:layout_constraintTop_toBottomOf="@+id/faceResult"
+            android:layout_marginTop="5dp">
 
             <ImageButton
                 android:id="@+id/infoButton"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="match_parent"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
@@ -130,7 +120,7 @@
             <ImageButton
                 android:id="@+id/saveButton"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="match_parent"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
@@ -139,13 +129,14 @@
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
+                android:onClick="onScreenShots"
                 tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck"
                 android:padding="5dp"/>
 
             <ImageButton
                 android:id="@+id/setupButton"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="match_parent"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
@@ -154,10 +145,22 @@
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
+                android:onClick="onSetup"
                 tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck"
                 android:padding="2dp"/>
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtResult"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:padding="16dp"
+            android:text=""
+            android:textAlignment="center"
+            android:textSize="16dp"
+            tools:layout_editor_absoluteX="16dp" />
+
 
     </LinearLayout>
     </ScrollView>

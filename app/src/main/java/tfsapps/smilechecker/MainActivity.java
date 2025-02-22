@@ -6,15 +6,20 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +53,18 @@ public class MainActivity extends AppCompatActivity {
     private int sad_num = 0;
     private int curious_num = 0;
 
+    private Switch SwFaceFrame;
+    private Switch SwFaceMark;
+    private Switch SwFaceHighMark;
+    private Switch SwFaceValue;
+    private Switch SwFaceHighSpeed;
+
+    private boolean isFaceFrame = true;
+    private boolean isFaceMark = true;
+    private boolean isFaceHighMark = false;
+    private boolean isFaceValue = false;
+    private boolean isAiHighSpeed = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,8 +74,20 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         txtResult = findViewById(R.id.txtResult);
         Button btnChooseImage = findViewById(R.id.btnChooseImage);
-
         btnChooseImage.setOnClickListener(v -> openGallery());
+
+        /*
+        // 画面の高さを取得
+        WindowManager windowManager = getWindowManager();
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int screenHeight = size.y; // 画面の高さ（ピクセル）
+
+        // ImageView の高さを設定（1/2サイズ）
+        ViewGroup.LayoutParams params = imageView.getLayoutParams();
+        params.height = screenHeight / 2;
+        imageView.setLayoutParams(params);*/
     }
 
     private void openGallery() {
@@ -72,7 +101,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             imageView.setImageURI(imageUri);
-            showProgressDialog(this);
+            int _time = 1500;
+            if (isAiHighSpeed) _time = 900;
+            showProgressDialog(this, _time);
             ResetSmileCheckerNum();
             analyzeImage();
             detectFaces();
@@ -105,15 +136,17 @@ public class MainActivity extends AppCompatActivity {
 
             //test_make  default = 0.7
             if (confidence > 0.5) { // 信頼度が70%以上のものだけ表示
-                resultText.append(labelText).append(" (").append(String.format("%.1f", confidence * 100)).append("%)\n");
+               resultText.append(labelText).append(" (").append(String.format("%.1f", confidence * 100)).append("%)\n");
             }
         }
 
+        /*  結果には何も出力しない
         if (resultText.length() > 0) {
             txtResult.setText(resultText.toString());
         } else {
             txtResult.setText("昆虫が識別できませんでした");
         }
+         */
     }
 
     private void detectFaces() {
@@ -197,10 +230,10 @@ public class MainActivity extends AppCompatActivity {
                     int faceCount = faces.size(); // 検出した顔の数
                     human_num = faceCount;
                     ResultSmile();
-                    Toast.makeText(this, "検出した人数: " + faceCount + "人", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(this, "検出した人数: " + faceCount + "人", Toast.LENGTH_LONG).show();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "顔を検出できませんでした", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(this, "顔を検出できませんでした", Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -334,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //進捗ダイアログ
-    public static void showProgressDialog(Context context) {
+    public static void showProgressDialog(Context context, int value) {
         // カスタムレイアウトを作成
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.dialog, null);
@@ -357,35 +390,77 @@ public class MainActivity extends AppCompatActivity {
         // ダイアログを表示
         progressDialog.show();
 
-        // 0.5秒後にダイアログを閉じる
-        new Handler().postDelayed(progressDialog::dismiss, 1500);
+        // 1.5秒後にダイアログを閉じる
+        new Handler().postDelayed(progressDialog::dismiss, value);
+    }
+
+    /**
+     * 「ボタン処理」
+     * **/
+    /* --- メイン画面 --- */
+    public void onScreenShots(View v){
+        MyScreenShots.takeScreenshotAndSave(this);
     }
 
 
-    /*
-    private String getEmotion(Face face) {
-        String emotionMessage = "Neutral";  // 初期値は「中立」
+    /* --- 設定画面 --- */
+    public void onSetup(View v){
+        setContentView(R.layout.activity_sub);
 
-        if (face.getSmilingProbability() != null) {
-            float smileProb = face.getSmilingProbability();
-            if (smileProb >= 1.0){
-                emotionMessage = "Perfect!!";
+        SwFaceFrame = findViewById(R.id.face_frame);
+        SwFaceMark = findViewById(R.id.face_mark);
+        SwFaceHighMark = findViewById(R.id.face_high_mark);
+        SwFaceValue = findViewById(R.id.face_value);
+        SwFaceHighSpeed = findViewById(R.id.ai_high_speed);
+
+        SwFaceFrame.setChecked(isFaceFrame);
+        SwFaceFrame.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceFrame = true;
+            } else {
+                isFaceFrame = false;
             }
-            else if (smileProb > 0.75) {
-                emotionMessage = "Smile";
-            } else if (smileProb > 0.5) {
-                emotionMessage = "Soft Smile";
+        });
+
+        SwFaceMark.setChecked(isFaceMark);
+        SwFaceMark.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceMark = true;
+            } else {
+                isFaceMark = false;
             }
-        }
+        });
 
-        // 他の表情の分類
-        if (face.getHeadEulerAngleX() > 15 || face.getHeadEulerAngleX() < -15) {
-            emotionMessage = "Serious"; // 頭を強く傾けている場合、真剣な表情
-        } else if (face.getHeadEulerAngleY() > 15 || face.getHeadEulerAngleY() < -15) {
-            emotionMessage = "Surprised"; // 頭を横に傾けることで驚きの表情
-        }
+        SwFaceHighMark.setChecked(isFaceHighMark);
+        SwFaceHighMark.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceHighMark = true;
+            } else {
+                isFaceHighMark = false;
+            }
+        });
 
-        return emotionMessage;
+        SwFaceValue.setChecked(isFaceValue);
+        SwFaceValue.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceValue = true;
+            } else {
+                isFaceValue = false;
+            }
+        });
+
+        SwFaceHighSpeed.setChecked(isAiHighSpeed);
+        SwFaceHighSpeed.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isAiHighSpeed = true;
+            } else {
+                isAiHighSpeed = false;
+            }
+        });
+
     }
-     */
+
+    public void onBack(View v){
+        setContentView(R.layout.activity_main);
+    }
 }

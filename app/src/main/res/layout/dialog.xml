@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textSize="16sp"
+        android:textStyle="bold"
         android:layout_marginBottom="20dp"/>
 
     <!-- プログレスバー -->
