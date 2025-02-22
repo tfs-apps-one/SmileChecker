@@ -32,7 +32,7 @@ public class MyScreenShots {
     }
 
     private static void saveBitmap(Activity activity, Bitmap bitmap) {
-        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Screenshots");
+        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "screenshots");
         if (!directory.exists()) {
             directory.mkdirs();
         }
@@ -42,7 +42,7 @@ public class MyScreenShots {
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            Toast.makeText(activity, "Saved: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, "Saved ... ", Toast.LENGTH_LONG).show();
 
             scanFile(activity, file.getAbsolutePath());
 

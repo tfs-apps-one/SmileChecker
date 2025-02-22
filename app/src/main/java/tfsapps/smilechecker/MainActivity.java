@@ -38,6 +38,7 @@ import com.google.mlkit.vision.label.ImageLabeler;
 import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private int curious_num = 0;
 
     private Button btnChooseImage;
+    private Button btnNextImage;
     private Switch SwFaceFrame;
     private Switch SwFaceMark;
     private Switch SwFaceHighMark;
@@ -73,19 +75,25 @@ public class MainActivity extends AppCompatActivity {
     private ImageView star_2;
     private ImageView star_3;
 
+    private static final int PICK_IMAGES_REQUEST = 1;
+    private ArrayList<Uri> imageUris = new ArrayList<>();
+    private int currentIndex = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
 
-        imageView = findViewById(R.id.imageView);
-        txtResult = findViewById(R.id.txtResult);
-        btnChooseImage = findViewById(R.id.btnChooseImage);
-        face_result = findViewById(R.id.faceResult);
-        star_1 = findViewById(R.id.result_1);
-        star_2 = findViewById(R.id.result_2);
-        star_3 = findViewById(R.id.result_3);
+//        imageView = findViewById(R.id.imageView);
+//        txtResult = findViewById(R.id.txtResult);
+//        btnChooseImage = findViewById(R.id.btnChooseImage);
+//        btnNextImage = findViewById(R.id.btnNextImage);
+//        face_result = findViewById(R.id.faceResult);
+//        star_1 = findViewById(R.id.result_1);
+//        star_2 = findViewById(R.id.result_2);
+//        star_3 = findViewById(R.id.result_3);
 
         //btnChooseImage.setOnClickListener(v -> onOpenGallery());
 
@@ -108,6 +116,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void MainScreenDisplay(){
 
+        imageView = findViewById(R.id.imageView);
+        txtResult = findViewById(R.id.txtResult);
+        btnChooseImage = findViewById(R.id.btnChooseImage);
+        btnNextImage = findViewById(R.id.btnNextImage);
+        if(currentIndex > 0) {
+            if (currentIndex >= imageUris.size()) {
+                btnNextImage.setEnabled(false); // 最後の画像ならボタンを無効化
+            }
+        }
+        face_result = findViewById(R.id.faceResult);
+        star_1 = findViewById(R.id.result_1);
+        star_2 = findViewById(R.id.result_2);
+        star_3 = findViewById(R.id.result_3);
+
         ImageView imageView = findViewById(R.id.imageView);
 
         if (mutableBitmap == null){
@@ -120,14 +142,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void processNextImage() {
+        if (currentIndex < imageUris.size()) {
+            Uri imageUri = imageUris.get(currentIndex);
+            imageView.setImageURI(imageUri); // 画像を表示
+
+            int _time = 1700;
+            if (isAiHighSpeed) _time = 1100;
+            showProgressDialog(this, _time);
+            ResetSmileCheckerNum();
+            analyzeImage(imageUri);
+            detectFaces();
+
+            currentIndex++;
+        }
+
+        if (currentIndex >= imageUris.size()) {
+            btnNextImage.setEnabled(false); // 最後の画像ならボタンを無効化
+            Toast.makeText(this, "すべての画像を処理しました", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //ギャラリー
+    /* １枚の処理
     public void onOpenGallery(View v) {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
+     */
+    public void onOpenGallery(View v) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // 複数選択を許可
+        startActivityForResult(Intent.createChooser(intent, "画像を選択"), PICK_IMAGES_REQUEST);
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        /* イメージ１個の処理
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             imageView.setImageURI(imageUri);
@@ -137,9 +191,28 @@ public class MainActivity extends AppCompatActivity {
             ResetSmileCheckerNum();
             analyzeImage();
             detectFaces();
+        }*/
+        if (requestCode == PICK_IMAGES_REQUEST && resultCode == RESULT_OK) {
+            if (data != null) {
+                imageUris.clear();
+                if (data.getClipData() != null) {
+                    int count = data.getClipData().getItemCount();
+                    for (int i = 0; i < count && i < 5; i++) {
+                        Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                        imageUris.add(imageUri);
+                    }
+                } else if (data.getData() != null) {
+                    imageUris.add(data.getData());
+                }
+
+                currentIndex = 0; // 最初の画像からスタート
+                btnNextImage.setEnabled(true);
+                processNextImage(); // 1枚目をすぐ表示
+            }
         }
     }
 
+    /* イメージ１枚の処理
     private void analyzeImage() {
         if (imageUri == null) return;
 
@@ -156,8 +229,29 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             txtResult.setText("画像の読み込みに失敗しました");
         }
-    }
 
+     */
+    private void analyzeImage(Uri imgUri) {
+        if (imgUri == null) {
+            return;
+        }
+        else {
+            imageUri = imgUri;
+        }
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            _bitmap = bitmap;
+            InputImage image = InputImage.fromBitmap(bitmap, 0);
+
+            ImageLabeler labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS);
+            labeler.process(image)
+                    .addOnSuccessListener(labels -> displayResults(labels))
+                    .addOnFailureListener(e -> txtResult.setText("判別失敗: " + e.getMessage()));
+
+        } catch (IOException e) {
+            txtResult.setText("画像の読み込みに失敗しました");
+        }
+    }
     private void displayResults(List<ImageLabel> labels) {
         StringBuilder resultText = new StringBuilder();
         for (ImageLabel label : labels) {
@@ -465,6 +559,9 @@ public class MainActivity extends AppCompatActivity {
         //MyScreenShots.takeScreenshotAndSave(this);
         showScreenShotsDialog();
     }
+    public void onNextImage(View v){
+        processNextImage();
+    }
 
 
     /* --- 設定画面 --- */
@@ -527,6 +624,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBack(View v){
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
+
         MainScreenDisplay();
     }
 }

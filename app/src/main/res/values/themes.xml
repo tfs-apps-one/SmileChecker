@@ -3,6 +3,9 @@
     <style name="Base.Theme.SmileChecker" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">#333333</item> <!-- ボタンやアクションバーのデフォルト色 -->
+        <item name="colorPrimaryVariant">#333333</item>
+        <item name="colorOnPrimary">#FFFFFF</item> <!-- ボタン上のテキスト色 -->
     </style>
 
     <style name="Theme.SmileChecker" parent="Base.Theme.SmileChecker" />

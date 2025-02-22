@@ -30,18 +30,45 @@
             android:adjustViewBounds="true"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/btnChooseImage"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="55dp"
+            android:orientation="horizontal"
             android:layout_marginStart="0dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
             android:layout_marginEnd="0dp"
-            android:text="画像を選択"
-            android:onClick="onOpenGallery"
-            app:layout_constraintTop_toBottomOf="@+id/imageView"
-            tools:layout_editor_absoluteX="16dp" />
+            android:padding="1dp">
+
+            <Button
+                android:id="@+id/btnChooseImage"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="0dp"
+                android:layout_marginEnd="10dp"
+                android:text="画像を選択"
+                android:onClick="onOpenGallery"
+                app:layout_constraintTop_toBottomOf="@+id/imageView"
+                tools:layout_editor_absoluteX="16dp" />
+
+            <Button
+                android:id="@+id/btnNextImage"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="0dp"
+                android:layout_marginEnd="10dp"
+                android:text="次へ"
+                android:onClick="onNextImage"
+                app:layout_constraintTop_toBottomOf="@+id/imageView"
+                tools:layout_editor_absoluteX="16dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
