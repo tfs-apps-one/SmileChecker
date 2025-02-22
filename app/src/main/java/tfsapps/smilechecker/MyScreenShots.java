@@ -42,13 +42,13 @@ public class MyScreenShots {
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            Toast.makeText(activity, "保存完了: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, "Saved: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
 
             scanFile(activity, file.getAbsolutePath());
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(activity, "保存に失敗しました", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "Save Error !!", Toast.LENGTH_SHORT).show();
         }
     }
 

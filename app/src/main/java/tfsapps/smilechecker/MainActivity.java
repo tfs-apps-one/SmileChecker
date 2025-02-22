@@ -1,6 +1,7 @@
 package tfsapps.smilechecker;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private int sad_num = 0;
     private int curious_num = 0;
 
+    private Button btnChooseImage;
     private Switch SwFaceFrame;
     private Switch SwFaceMark;
     private Switch SwFaceHighMark;
@@ -65,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean isFaceValue = false;
     private boolean isAiHighSpeed = false;
 
+    private Bitmap mutableBitmap = null;
+    private TextView face_result;
+    private ImageView star_1;
+    private ImageView star_2;
+    private ImageView star_3;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,10 +81,17 @@ public class MainActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.imageView);
         txtResult = findViewById(R.id.txtResult);
-        Button btnChooseImage = findViewById(R.id.btnChooseImage);
-        btnChooseImage.setOnClickListener(v -> openGallery());
+        btnChooseImage = findViewById(R.id.btnChooseImage);
+        face_result = findViewById(R.id.faceResult);
+        star_1 = findViewById(R.id.result_1);
+        star_2 = findViewById(R.id.result_2);
+        star_3 = findViewById(R.id.result_3);
 
-        /*
+        //btnChooseImage.setOnClickListener(v -> onOpenGallery());
+
+        MainScreenDisplay();
+
+        /***
         // 画面の高さを取得
         WindowManager windowManager = getWindowManager();
         Display display = windowManager.getDefaultDisplay();
@@ -87,10 +102,25 @@ public class MainActivity extends AppCompatActivity {
         // ImageView の高さを設定（1/2サイズ）
         ViewGroup.LayoutParams params = imageView.getLayoutParams();
         params.height = screenHeight / 2;
-        imageView.setLayoutParams(params);*/
+        imageView.setLayoutParams(params);
+        ***/
     }
 
-    private void openGallery() {
+    public void MainScreenDisplay(){
+
+        ImageView imageView = findViewById(R.id.imageView);
+
+        if (mutableBitmap == null){
+            imageView.setImageResource(R.drawable.sample);
+            face_result.setText("画像を選択して下さい\n結果はこちらに出力されます↓");
+        }
+        else{
+            imageView.setImageBitmap(mutableBitmap); // 枠付き画像をセット
+            ResultSmile();
+        }
+    }
+
+    public void onOpenGallery(View v) {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
@@ -101,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             imageView.setImageURI(imageUri);
-            int _time = 1500;
-            if (isAiHighSpeed) _time = 900;
+            int _time = 1700;
+            if (isAiHighSpeed) _time = 1100;
             showProgressDialog(this, _time);
             ResetSmileCheckerNum();
             analyzeImage();
@@ -139,14 +169,6 @@ public class MainActivity extends AppCompatActivity {
                resultText.append(labelText).append(" (").append(String.format("%.1f", confidence * 100)).append("%)\n");
             }
         }
-
-        /*  結果には何も出力しない
-        if (resultText.length() > 0) {
-            txtResult.setText(resultText.toString());
-        } else {
-            txtResult.setText("昆虫が識別できませんでした");
-        }
-         */
     }
 
     private void detectFaces() {
@@ -171,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(faces -> {
 
                     // Bitmapのコピーを作成（元画像を変更せずに描画するため）
-                    Bitmap mutableBitmap = _bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    mutableBitmap = _bitmap.copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(mutableBitmap);
                     Paint paint = new Paint();
                     paint.setColor(Color.GREEN);  // 緑色の枠
@@ -191,11 +213,13 @@ public class MainActivity extends AppCompatActivity {
                     textValuePaint.setStyle(Paint.Style.FILL);
 
                     for (Face face : faces) {
+
                         // 顔の矩形領域を取得
                         RectF bounds = new RectF(face.getBoundingBox());
-
                         // 顔を囲む緑枠を描画
-                        canvas.drawRect(bounds, paint);
+                        if (isFaceFrame){
+                            canvas.drawRect(bounds, paint);
+                        }
 
                         // 表情の判定
                         String emotionMessage = "";
@@ -203,22 +227,21 @@ public class MainActivity extends AppCompatActivity {
                         if (face.getSmilingProbability() != null) {
 
                             // 笑顔の確率を取得
-                            emotionMessage = getEmotion(face);
+                            if (isFaceHighMark) {
+                                emotionMessage = getEmotion(face);
+                            }
+                            else{
+                                emotionMessage = getEmotionBasice(face);
+                            }
                             float smileProb = face.getSmilingProbability();
                             emotionValue =  String.format("%.0f%%", smileProb * 100);
-//                            float smileProb = face.getSmilingProbability();
-//                            if (smileProb > 0.5) {
-//                                emotionMessage = "Smile!";
-//                            } else {
-//                                emotionMessage = "Neutral";
-//                            }
                         }
 
                         // メッセージを顔の下に表示
-                        if (!emotionMessage.isEmpty()) {
+                        if (isFaceMark && !emotionMessage.isEmpty()) {
                             canvas.drawText(emotionMessage, bounds.left, bounds.bottom + 110, textPaint);
                         }
-                        if (!emotionValue.isEmpty() && emotionMessage.toLowerCase().contains("smile")) {
+                        if (isFaceValue && !emotionValue.isEmpty() && emotionMessage.toLowerCase().contains("smile")) {
                             canvas.drawText(emotionValue, bounds.left, bounds.top - 110, textValuePaint);
                         }
                     }
@@ -249,10 +272,6 @@ public class MainActivity extends AppCompatActivity {
     //笑顔表記
     public void ResultSmile(){
 
-        TextView face_result = findViewById(R.id.faceResult);
-        ImageView star_1 = findViewById(R.id.result_1);
-        ImageView star_2 = findViewById(R.id.result_2);
-        ImageView star_3 = findViewById(R.id.result_3);
         String message = "";
 
         float _percent = 0;
@@ -312,7 +331,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // 表情を判定するメソッド
+    // 表情を判定するメソッドベーシック
+    private String getEmotionBasice(Face face) {
+        String emotionMessage = "Neutral";  // 初期値は「中立」
+
+        // 笑顔の判定
+        if (face.getSmilingProbability() != null) {
+            float smileProb = face.getSmilingProbability();
+            if (smileProb > 0.5) {
+                emotionMessage = "Smile";
+                smile_num++;
+                return emotionMessage;
+            }
+        }
+        return  emotionMessage;
+    }
+
+        // 表情を判定するメソッド
     private String getEmotion(Face face) {
         String emotionMessage = "Neutral";  // 初期値は「中立」
 
@@ -396,10 +431,39 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * 「ボタン処理」
-     * **/
+     **/
+    //スクショ確認ダイアログ
+    public void showScreenShotsDialog() {
+
+        String title = "";
+        String message = "\n\n\n\n\n\n\n【スクリーンショット】として保存しますか？\n\n\n\n\n\n";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton("はい", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ScreenShotsDone();
+            }
+        });
+        builder.setNegativeButton("いいえ", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setCancelable(false);
+        builder.show();
+
+    }
+    public void ScreenShotsDone(){
+        MyScreenShots.takeScreenshotAndSave(this);
+    }
     /* --- メイン画面 --- */
     public void onScreenShots(View v){
-        MyScreenShots.takeScreenshotAndSave(this);
+        //MyScreenShots.takeScreenshotAndSave(this);
+        showScreenShotsDialog();
     }
 
 
@@ -461,6 +525,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBack(View v){
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
+        MainScreenDisplay();
     }
 }
