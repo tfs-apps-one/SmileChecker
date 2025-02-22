@@ -1,20 +1,32 @@
 package tfsapps.smilechecker;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.view.Display;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetection;
@@ -35,16 +47,47 @@ public class MainActivity extends AppCompatActivity {
     private Uri imageUri;
     private Bitmap _bitmap = null;
 
+    private int human_num = 0;
+    private int smile_num = 0;
+    private int angry_num = 0;
+    private int sad_num = 0;
+    private int curious_num = 0;
+
+    private Switch SwFaceFrame;
+    private Switch SwFaceMark;
+    private Switch SwFaceHighMark;
+    private Switch SwFaceValue;
+    private Switch SwFaceHighSpeed;
+
+    private boolean isFaceFrame = true;
+    private boolean isFaceMark = true;
+    private boolean isFaceHighMark = false;
+    private boolean isFaceValue = false;
+    private boolean isAiHighSpeed = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
 
         imageView = findViewById(R.id.imageView);
         txtResult = findViewById(R.id.txtResult);
         Button btnChooseImage = findViewById(R.id.btnChooseImage);
-
         btnChooseImage.setOnClickListener(v -> openGallery());
+
+        /*
+        // 画面の高さを取得
+        WindowManager windowManager = getWindowManager();
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int screenHeight = size.y; // 画面の高さ（ピクセル）
+
+        // ImageView の高さを設定（1/2サイズ）
+        ViewGroup.LayoutParams params = imageView.getLayoutParams();
+        params.height = screenHeight / 2;
+        imageView.setLayoutParams(params);*/
     }
 
     private void openGallery() {
@@ -58,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             imageView.setImageURI(imageUri);
+            int _time = 1500;
+            if (isAiHighSpeed) _time = 900;
+            showProgressDialog(this, _time);
+            ResetSmileCheckerNum();
             analyzeImage();
             detectFaces();
         }
@@ -87,16 +134,19 @@ public class MainActivity extends AppCompatActivity {
             String labelText = label.getText(); // 昆虫の名前
             float confidence = label.getConfidence(); // 信頼度 (0.0 - 1.0)
 
-            if (confidence > 0.7) { // 信頼度が70%以上のものだけ表示
-                resultText.append(labelText).append(" (").append(String.format("%.1f", confidence * 100)).append("%)\n");
+            //test_make  default = 0.7
+            if (confidence > 0.5) { // 信頼度が70%以上のものだけ表示
+               resultText.append(labelText).append(" (").append(String.format("%.1f", confidence * 100)).append("%)\n");
             }
         }
 
+        /*  結果には何も出力しない
         if (resultText.length() > 0) {
             txtResult.setText(resultText.toString());
         } else {
             txtResult.setText("昆虫が識別できませんでした");
         }
+         */
     }
 
     private void detectFaces() {
@@ -178,11 +228,87 @@ public class MainActivity extends AppCompatActivity {
                     imageView.setImageBitmap(mutableBitmap); // 枠付き画像をセット
 
                     int faceCount = faces.size(); // 検出した顔の数
-                    Toast.makeText(this, "検出した人数: " + faceCount + "人", Toast.LENGTH_LONG).show();
+                    human_num = faceCount;
+                    ResultSmile();
+//                    Toast.makeText(this, "検出した人数: " + faceCount + "人", Toast.LENGTH_LONG).show();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "顔を検出できませんでした", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(this, "顔を検出できませんでした", Toast.LENGTH_LONG).show();
                 });
+    }
+
+    //パラメータ初期化
+    public void ResetSmileCheckerNum(){
+        human_num = 0;
+        smile_num = 0;
+        angry_num = 0;
+        sad_num = 0;
+        curious_num = 0;
+    }
+
+    //笑顔表記
+    public void ResultSmile(){
+
+        TextView face_result = findViewById(R.id.faceResult);
+        ImageView star_1 = findViewById(R.id.result_1);
+        ImageView star_2 = findViewById(R.id.result_2);
+        ImageView star_3 = findViewById(R.id.result_3);
+        String message = "";
+
+        float _percent = 0;
+        float _smile = 0;
+        float _human = 0;
+
+        if (human_num > 0 && smile_num > 0){
+
+            _smile = (float)smile_num;
+            _human = (float)human_num;
+
+            _percent = (_smile / _human);
+
+            if (human_num == smile_num || _percent >= 1.0){
+                message = "満点の【スマイル】です";
+
+                star_1.setImageResource(R.drawable.star_ok);
+                star_2.setImageResource(R.drawable.star_ok);
+                star_3.setImageResource(R.drawable.star_ok);
+            }
+            else if(_percent >= 0.5){
+                message = "多くの【スマイル】があります";
+
+                star_1.setImageResource(R.drawable.star_ok);
+                star_2.setImageResource(R.drawable.star_ok);
+                star_3.setImageResource(R.drawable.star_ng2);
+            }
+            else{
+                message = "少しの【スマイル】があります";
+
+                star_1.setImageResource(R.drawable.star_ok);
+                star_2.setImageResource(R.drawable.star_ng2);
+                star_3.setImageResource(R.drawable.star_ng2);
+            }
+        }
+        else{
+            if (human_num == 0) {
+                message = "【人を検知できません】";
+            }
+            else{
+                message = "【スマイル】がないかな？";
+            }
+            star_1.setImageResource(R.drawable.star_ng2);
+            star_2.setImageResource(R.drawable.star_ng2);
+            star_3.setImageResource(R.drawable.star_ng2);
+        }
+        //共通部分
+        message +=
+                "\n"+
+                "\n　人の検出　："+human_num+
+                "\n　スマイル　："+smile_num+
+                "\n　悲しい　　："+sad_num+
+                "\n　怒り・立腹："+angry_num+
+                "\n　興味・困惑："+curious_num+
+                "\n";
+                face_result.setText(message);
     }
 
 
@@ -200,9 +326,17 @@ public class MainActivity extends AppCompatActivity {
             } else if (smileProb > 0.5) {
                 emotionMessage = "Soft Smile";
             } else if (smileProb < 0.2) {
-                //emotionMessage = "Sad"; // ほぼ笑っていない場合は悲しみ
+//                emotionMessage = "Sad"; // ほぼ笑っていない場合は悲しみ
+//                sad_num++;
+            }
+
+            if (smileProb > 0.5){
+                smile_num++;
+                return emotionMessage;
             }
         }
+
+        // ↓↓　以下は笑顔ではない判定の時
 
         // 目の開き具合で感情を判定
         if (face.getLeftEyeOpenProbability() != null && face.getRightEyeOpenProbability() != null) {
@@ -212,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (avgEyeOpen < 0.3) {
                 emotionMessage = "Angry"; // 目を細めている → 怒り
+                angry_num++;
             } else if (avgEyeOpen > 0.9) {
                 //emotionMessage = "Surprised"; // 目を大きく見開いている → 驚き
             }
@@ -220,38 +355,112 @@ public class MainActivity extends AppCompatActivity {
         // 頭の傾きで追加判定
         if (face.getHeadEulerAngleX() > 20) {
             emotionMessage = "Sad"; // 下を向いている → 悲しみ
+            sad_num++;
         } else if (face.getHeadEulerAngleX() < -20) {
             //emotionMessage = "Confused"; // 上を向いている → 困惑
         } else if (face.getHeadEulerAngleY() > 20 || face.getHeadEulerAngleY() < -20) {
             emotionMessage = "Curious"; // 横に傾けている → 疑問・興味
+            curious_num++;
         }
 
         return emotionMessage;
     }
-    /*
-    private String getEmotion(Face face) {
-        String emotionMessage = "Neutral";  // 初期値は「中立」
 
-        if (face.getSmilingProbability() != null) {
-            float smileProb = face.getSmilingProbability();
-            if (smileProb >= 1.0){
-                emotionMessage = "Perfect!!";
-            }
-            else if (smileProb > 0.75) {
-                emotionMessage = "Smile";
-            } else if (smileProb > 0.5) {
-                emotionMessage = "Soft Smile";
-            }
-        }
+    //進捗ダイアログ
+    public static void showProgressDialog(Context context, int value) {
+        // カスタムレイアウトを作成
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(R.layout.dialog, null);
 
-        // 他の表情の分類
-        if (face.getHeadEulerAngleX() > 15 || face.getHeadEulerAngleX() < -15) {
-            emotionMessage = "Serious"; // 頭を強く傾けている場合、真剣な表情
-        } else if (face.getHeadEulerAngleY() > 15 || face.getHeadEulerAngleY() < -15) {
-            emotionMessage = "Surprised"; // 頭を横に傾けることで驚きの表情
-        }
+        String title = "【 AI解析中... 】";
+        String message = "\n\n\n\n\n\n\nしばらくお待ちください\n\n\n\n\n\n";
 
-        return emotionMessage;
+        // タイトルとメッセージをセット
+        TextView titleView = view.findViewById(R.id.dialogTitle);
+        TextView messageView = view.findViewById(R.id.dialogMessage);
+        titleView.setText(title);
+        messageView.setText(message);
+
+        // ダイアログを作成
+        AlertDialog progressDialog = new AlertDialog.Builder(context)
+                .setView(view)           // ProgressBar をセット
+                .setCancelable(false)    // 手動で閉じられないようにする
+                .create();
+
+        // ダイアログを表示
+        progressDialog.show();
+
+        // 1.5秒後にダイアログを閉じる
+        new Handler().postDelayed(progressDialog::dismiss, value);
     }
-     */
+
+    /**
+     * 「ボタン処理」
+     * **/
+    /* --- メイン画面 --- */
+    public void onScreenShots(View v){
+        MyScreenShots.takeScreenshotAndSave(this);
+    }
+
+
+    /* --- 設定画面 --- */
+    public void onSetup(View v){
+        setContentView(R.layout.activity_sub);
+
+        SwFaceFrame = findViewById(R.id.face_frame);
+        SwFaceMark = findViewById(R.id.face_mark);
+        SwFaceHighMark = findViewById(R.id.face_high_mark);
+        SwFaceValue = findViewById(R.id.face_value);
+        SwFaceHighSpeed = findViewById(R.id.ai_high_speed);
+
+        SwFaceFrame.setChecked(isFaceFrame);
+        SwFaceFrame.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceFrame = true;
+            } else {
+                isFaceFrame = false;
+            }
+        });
+
+        SwFaceMark.setChecked(isFaceMark);
+        SwFaceMark.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceMark = true;
+            } else {
+                isFaceMark = false;
+            }
+        });
+
+        SwFaceHighMark.setChecked(isFaceHighMark);
+        SwFaceHighMark.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceHighMark = true;
+            } else {
+                isFaceHighMark = false;
+            }
+        });
+
+        SwFaceValue.setChecked(isFaceValue);
+        SwFaceValue.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isFaceValue = true;
+            } else {
+                isFaceValue = false;
+            }
+        });
+
+        SwFaceHighSpeed.setChecked(isAiHighSpeed);
+        SwFaceHighSpeed.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                isAiHighSpeed = true;
+            } else {
+                isAiHighSpeed = false;
+            }
+        });
+
+    }
+
+    public void onBack(View v){
+        setContentView(R.layout.activity_main);
+    }
 }
