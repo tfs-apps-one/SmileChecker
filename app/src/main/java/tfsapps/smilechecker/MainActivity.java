@@ -1,8 +1,11 @@
 package tfsapps.smilechecker;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -64,12 +67,20 @@ public class MainActivity extends AppCompatActivity {
     private Switch SwFaceHighSpeed;
     private Switch SwSelectionNum;
 
+    private MyOpenHelper helper;    //DBアクセス
+    private boolean is_open = false;    //DB使用したか
     private boolean isFaceFrame = true;
     private boolean isFaceMark = true;
     private boolean isFaceHighMark = false;
     private boolean isFaceValue = false;
     private boolean isAiHighSpeed = false;
     private boolean isSelectNum = false;
+    private boolean isPremium = false;
+    private int db_system1 = 0;
+    private int db_system2 = 0;
+    private int db_system3 = 0;
+    private int db_system4 = 0;
+    private int db_system5 = 0;
 
     private Bitmap mutableBitmap = null;
     private TextView face_result;
@@ -102,6 +113,81 @@ public class MainActivity extends AppCompatActivity {
         params.height = screenHeight / 2;
         imageView.setLayoutParams(params);
         ***/
+    }
+
+    /**
+     * OS関連処理
+     */
+    @Override
+    public void onStart() {
+        super.onStart();
+        //DBのロード
+        /* データベース */
+        helper = new MyOpenHelper(this);
+        AppDBInitRoad();
+
+        /*
+        //評価ポップアップ処理
+        if (db_system1 <= REVIEW_POP){
+            if (ReviewCount != 0){
+                db_system1++;
+                ReviewCount = 0;
+            }
+        }
+        ShowRatingPopup();
+         */
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        /*
+        //サブスク
+        //BillingClientを初期化
+        billingClient = BillingClient.newBuilder(this)
+                .setListener(this)
+                .enablePendingPurchases()
+                .build();
+
+        // Google Playへの接続
+        billingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    Log.d(TAG, "@@@@@@ Billing Client connected ");
+                    checkSubscriptionStatus();
+                } else {
+                    Log.e(TAG, "@@@@@@ Billing connection failed: " + billingResult.getDebugMessage());
+//                    Log.e(TAG, "Billing Client connection failed");
+                }
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                Log.e(TAG, "@@@@@@ Billing Service disconnected");
+            }
+        });
+        */
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        //  DB更新
+        AppDBUpdated();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+//        if (billingClient != null){
+//            billingClient.endConnection();
+//        }
     }
 
     public void MainScreenDisplay(){
@@ -686,4 +772,194 @@ public class MainActivity extends AppCompatActivity {
 
         MainScreenDisplay();
     }
+
+
+    /***************************************************
+         DB初期ロードおよび設定
+     ****************************************************/
+    public void AppDBInitRoad() {
+        SQLiteDatabase db = helper.getReadableDatabase();
+        StringBuilder sql = new StringBuilder();
+        int temp_int = 0;
+
+        sql.append(" SELECT");
+        sql.append(" is_open");
+        sql.append(" ,face_frame,face_mark");
+        sql.append(" ,face_high_mark,face_value");
+        sql.append(" ,face_high_speed,face_select_num");
+        sql.append(" ,premium_plan");
+        sql.append(" ,system1,system2");
+        sql.append(" ,system3,system4");
+        sql.append(" ,system5");
+        sql.append(" FROM appinfo;");
+        try {
+            Cursor cursor = db.rawQuery(sql.toString(), null);
+            //TextViewに表示
+            StringBuilder text = new StringBuilder();
+
+            if (cursor.moveToNext()) {
+                temp_int = cursor.getInt(0);
+                if (temp_int > 0)   is_open = true;
+                else                is_open = false;
+
+                temp_int = cursor.getInt(1);
+                if (temp_int > 0)   isFaceFrame = true;
+                else                isFaceFrame = false;
+
+                temp_int = cursor.getInt(2);
+                if (temp_int > 0)   isFaceMark = true;
+                else                isFaceMark = false;
+
+                temp_int = cursor.getInt(3);
+                if (temp_int > 0)   isFaceHighMark = true;
+                else                isFaceHighMark = false;
+
+                temp_int = cursor.getInt(4);
+                if (temp_int > 0)   isFaceValue = true;
+                else                isFaceValue = false;
+
+                temp_int = cursor.getInt(5);
+                if (temp_int > 0)   isAiHighSpeed = true;
+                else                isAiHighSpeed = false;
+
+                temp_int = cursor.getInt(6);
+                if (temp_int > 0)   isSelectNum = true;
+                else                isSelectNum = false;
+
+                temp_int = cursor.getInt(7);
+                if (temp_int > 0)   isPremium = true;
+                else                isPremium = false;
+
+                db_system1 = cursor.getInt(8);
+                db_system2 = cursor.getInt(9);
+                db_system3 = cursor.getInt(10);
+                db_system4 = cursor.getInt(11);
+                db_system5 = cursor.getInt(12);
+            }
+        } finally {
+            db.close();
+        }
+
+        db = helper.getWritableDatabase();
+        if (is_open == false) {
+            long ret;
+            // 新規レコード追加
+            ContentValues insertValues = new ContentValues();
+            insertValues.put("is_open", 1);
+            insertValues.put("face_frame", 1);
+            insertValues.put("face_mark", 1);
+            insertValues.put("face_high_mark", 0);
+            insertValues.put("face_value", 0);
+            insertValues.put("face_high_speed", 0);
+            insertValues.put("face_select_num", 0);
+            insertValues.put("premium_plan", 0);
+            insertValues.put("system1", 0);
+            insertValues.put("system2", 0);
+            insertValues.put("system3", 0);
+            insertValues.put("system4", 0);
+            insertValues.put("system5", 0);
+            try {
+                ret = db.insert("appinfo", null, insertValues);
+            } finally {
+                db.close();
+            }
+            /*
+            if (ret == -1) {
+                Toast.makeText(this, "DataBase Create.... ERROR", Toast.LENGTH_SHORT).show();
+            } else {
+                is_open = true;
+                Toast.makeText(this, "DataBase Create.... OK", Toast.LENGTH_SHORT).show();
+            }
+             */
+
+        } else {
+            /*
+            if (is_open){
+                temp_int = 1;
+            }
+            else{
+                temp_int = 0;
+            }
+            Toast.makeText(this, "Data Loading...  isopen:" + temp_int, Toast.LENGTH_SHORT).show();
+             */
+        }
+    }
+    /***************************************************
+     DB更新
+     ****************************************************/
+    public void AppDBUpdated() {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues insertValues = new ContentValues();
+
+        int temp_int = 0;
+
+        if (is_open)        temp_int = 1;
+        else                temp_int = 0;
+        insertValues.put("is_open", temp_int);
+
+        if (isFaceFrame)    temp_int = 1;
+        else                temp_int = 0;
+        insertValues.put("face_frame", temp_int);
+
+        if (isFaceMark)     temp_int = 1;
+        else                temp_int = 0;
+        insertValues.put("face_mark", temp_int);
+
+        if (isFaceHighMark) temp_int = 1;
+        else                temp_int = 0;
+        temp_int = 0;   //test_make
+        insertValues.put("face_high_mark", temp_int);
+
+        if (isFaceValue)    temp_int = 1;
+        else                temp_int = 0;
+        temp_int = 0;   //test_make
+        insertValues.put("face_value", temp_int);
+
+        if (isAiHighSpeed)  temp_int = 1;
+        else                temp_int = 0;
+        temp_int = 0;   //test_make
+        insertValues.put("face_high_speed", temp_int);
+
+        if (isSelectNum)    temp_int = 1;
+        else                temp_int = 0;
+        temp_int = 0;   //test_make
+        insertValues.put("face_select_num", temp_int);
+
+        if (isPremium)      temp_int = 1;
+        else                temp_int = 0;
+        temp_int = 0;   //test_make
+        insertValues.put("premium_plan", temp_int);
+
+        /*
+        *   プログラム固定で！！
+        * */
+
+        insertValues.put("system1", db_system1);
+        insertValues.put("system2", db_system2);
+        insertValues.put("system3", db_system3);
+        insertValues.put("system4", db_system4);
+        insertValues.put("system5", db_system5);
+        int ret;
+        try {
+            ret = db.update("appinfo", insertValues, null, null);
+        } finally {
+            db.close();
+        }
+        /*
+        if (ret != -1){
+            Context context = getApplicationContext();
+            Toast.makeText(context, "セーブ中...", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "セーブ中...("+db_data1+")...", Toast.LENGTH_SHORT).show();
+        }
+        */
+
+        /*
+        if (ret == -1) {
+            Toast.makeText(this, "Saving.... ERROR ", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Saving.... OK ", Toast.LENGTH_SHORT).show();
+        }
+         */
+    }
+
 }
