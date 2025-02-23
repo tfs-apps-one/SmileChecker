@@ -189,6 +189,17 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginBottom="3dp"/>
 
+            <TextView
+                android:id="@+id/explan_7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="5dp"
+                android:text="\n今だけ【プレミアム】機能が使いたい放題です。ぜひお得なうちにご利用下さい。"
+                android:textSize="15sp"
+                android:textColor="#992222"
+                android:textStyle="bold"/>
+
         </LinearLayout>
     </ScrollView>
 

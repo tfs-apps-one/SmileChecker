@@ -87,18 +87,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
-
-//        imageView = findViewById(R.id.imageView);
-//        txtResult = findViewById(R.id.txtResult);
-//        btnChooseImage = findViewById(R.id.btnChooseImage);
-//        btnNextImage = findViewById(R.id.btnNextImage);
-//        face_result = findViewById(R.id.faceResult);
-//        star_1 = findViewById(R.id.result_1);
-//        star_2 = findViewById(R.id.result_2);
-//        star_3 = findViewById(R.id.result_3);
-
-        //btnChooseImage.setOnClickListener(v -> onOpenGallery());
-
         MainScreenDisplay();
 
         /***
@@ -297,21 +285,36 @@ public class MainActivity extends AppCompatActivity {
                     // Bitmapのコピーを作成（元画像を変更せずに描画するため）
                     mutableBitmap = _bitmap.copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(mutableBitmap);
+
+                    // 画像の幅と高さを取得
+                    int imageWidth = mutableBitmap.getWidth();
+                    int imageHeight = mutableBitmap.getHeight();
+                    // 画像の短辺を基準にスケーリング
+                    int minSize = Math.min(imageWidth, imageHeight);
+                    // 枠線の太さを画像サイズに応じて調整 (短辺の 1% にする)
+                    float strokeWidth = (minSize/3) * 0.01f; // 1% の太さ
+                    // テキストサイズを画像サイズに応じて調整 (短辺の 5% にする)
+                    float textSize = (minSize/3)*2 * 0.05f; // 5% の大きさ
+
                     Paint paint = new Paint();
                     paint.setColor(Color.GREEN);  // 緑色の枠
                     paint.setStyle(Paint.Style.STROKE);  // 枠線のみ描画
-                    paint.setStrokeWidth(8);  // 枠線の太さを8pxに設定
+                    paint.setStrokeWidth(strokeWidth);
+//                    paint.setStrokeWidth(8);  // 枠線の太さを8pxに設定
+
 
                     // テキスト用のペイントオブジェクト
                     Paint textPaint = new Paint();
                     textPaint.setColor(Color.GREEN);
-                    textPaint.setTextSize(110);
+                    textPaint.setTextSize(textSize);
+//                    textPaint.setTextSize(110);
                     textPaint.setStyle(Paint.Style.FILL);
 
                     // テキスト用のペイントオブジェクト
                     Paint textValuePaint = new Paint();
                     textValuePaint.setColor(Color.GREEN);
-                    textValuePaint.setTextSize(110);
+                    textValuePaint.setTextSize(textSize);
+//                    textValuePaint.setTextSize(110);
                     textValuePaint.setStyle(Paint.Style.FILL);
 
                     for (Face face : faces) {
@@ -341,10 +344,12 @@ public class MainActivity extends AppCompatActivity {
 
                         // メッセージを顔の下に表示
                         if (isFaceMark && !emotionMessage.isEmpty()) {
-                            canvas.drawText(emotionMessage, bounds.left, bounds.bottom + 110, textPaint);
+                            canvas.drawText(emotionMessage, bounds.left, bounds.bottom + textSize, textPaint);
+//                            canvas.drawText(emotionMessage, bounds.left, bounds.bottom + 110, textPaint);
                         }
                         if (isFaceValue && !emotionValue.isEmpty() && emotionMessage.toLowerCase().contains("smile")) {
-                            canvas.drawText(emotionValue, bounds.left, bounds.top - 110, textValuePaint);
+                            canvas.drawText(emotionValue, bounds.left, bounds.top - textSize, textValuePaint);
+//                            canvas.drawText(emotionValue, bounds.left, bounds.top - 110, textValuePaint);
                         }
                     }
 
@@ -564,15 +569,19 @@ public class MainActivity extends AppCompatActivity {
         String title = "【アプリの使い方】";
         String message =
                         "\n"+
+                        "\n本アプリは「顔認識AI」を活用してスマイルを判定するアプリです。"+
+                        "\n例えば家族であるシーンを複数枚撮った時、この写真の内どの一枚が家族全員スマイルしているかを調べるのに便利です。"+
+                        "\n"+
                         "\n【注意】"+
                         "\nAIの判定結果は参考程度にご利用下さい。"+
                         "\n"+
                         "\n【使い方】"+
                         "\nまずは画像を選択して下さい。選択後、AIが顔認識を行いスマイル度を判定します。"+
-                        "\n例えばあるシーンを複数枚撮った時、どの写真一番スマイルしているかなどを判定するのに便利です"+
+                        "\n画像の複数枚選択機能は3枚(初期設定)までとなります。それ以上選択した場合は最初の3枚が優先されます。"+
                         "\n"+
                         "\n判定した結果はスクリーンショットとして保存することが出来ます。"+
-                        "\nアプリをもっと便利に使える設定もあります。設定画面を確認下さい。"+
+                        "\nアプリをもっと便利に使える設定もあります。設定画面を確認下さい。【プレミアム】の利用でより高度な機能を使うことが出来ます。"+
+                        "\n"+
                         "\n"+
                         "\n";
 
