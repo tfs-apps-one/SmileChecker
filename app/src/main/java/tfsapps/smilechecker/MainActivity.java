@@ -201,6 +201,11 @@ public class MainActivity extends AppCompatActivity {
                 btnNextImage.setEnabled(false); // 最後の画像ならボタンを無効化
             }
         }
+        else{
+            if (imageUris.isEmpty()){
+                btnNextImage.setEnabled(false); // 最後の画像ならボタンを無効化
+            }
+        }
         face_result = findViewById(R.id.faceResult);
         star_1 = findViewById(R.id.result_1);
         star_2 = findViewById(R.id.result_2);

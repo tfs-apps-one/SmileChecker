@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     dependencies {
-        classpath 'com.google.gms:google-services:4.3.10' // 最新版に更新可能
+        classpath 'com.google.gms:google-services:4.3.15' // 4.3.10　→ 4.3.15最新版に更新可能
     }
 }
 
