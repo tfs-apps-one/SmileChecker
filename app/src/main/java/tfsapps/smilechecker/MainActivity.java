@@ -1,4 +1,5 @@
 package tfsapps.smilechecker;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -27,10 +28,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetection;
@@ -44,8 +48,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
+
+public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
     private ImageView imageView;
     private TextView txtResult;
@@ -76,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isAiHighSpeed = false;
     private boolean isSelectNum = false;
     private boolean isPremium = false;
-    private int db_system1 = 0;
-    private int db_system2 = 0;
+    private int db_system1 = 0; //アプリ起動回数
+    private int db_system2 = 0; //プレミアム使用回数のカウント値
     private int db_system3 = 0;
     private int db_system4 = 0;
     private int db_system5 = 0;
@@ -92,13 +104,25 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Uri> imageUris = new ArrayList<>();
     private int currentIndex = 0;
     private int MaxSelectNum = 3;
+    //広告
+    private boolean visibleAd = true;
+    private AdView mAdview;
+    public RewardedAd rewardedAd;
+    private int MAX_PREMIUM_USE_COUNT = 5;
+    private boolean isRewardReadyGo = false;
+    //test_make
+    // 本番ID 動画
+    private String AD_UNIT_ID = "ca-app-pub-4924620089567925/1332434981";
+    //テストID バナー
+//    private String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
-        MainScreenDisplay();
 
         /***
         // 画面の高さを取得
@@ -113,7 +137,74 @@ public class MainActivity extends AppCompatActivity {
         params.height = screenHeight / 2;
         imageView.setLayoutParams(params);
         ***/
+
+        //動画リワード
+        loadRewardedAd();
+
+        MainScreenDisplay();
     }
+
+    //リワード動画
+    private void loadRewardedAd() {
+        RewardedAd.load(this,
+                AD_UNIT_ID,
+                new AdRequest.Builder().build(),
+                new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(RewardedAd Ad) {
+                        rewardedAd = Ad;
+
+                        //報酬動画準備OK
+                        isRewardReadyGo = true;
+
+//                        Context context = getApplicationContext();
+//                        Toast.makeText(context, "動画準備OK !!", Toast.LENGTH_SHORT).show();
+//                        Log.d("TAG", "The rewarded ad loaded.");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+//                        Log.d("TAG", "The rewarded ad wasn't loaded yet.");
+                    }
+                });
+
+    }
+    public void RdShow(){
+        if (rewardedAd != null) {
+            Activity activityContext = MainActivity.this;
+            rewardedAd.show(activityContext, new OnUserEarnedRewardListener() {
+                @Override
+                public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                    // Handle the reward.
+                    int rewardAmount = rewardItem.getAmount();
+                    String rewardType = rewardItem.getType();
+                    RdPresent();
+                }
+            });
+        } else {
+//            Log.d("TAG", "The rewarded ad wasn't ready yet.");
+        }
+    }
+    public void RdPresent() {
+        Context context = getApplicationContext();
+        Toast.makeText(context, "プレミアム設定は【有効】となりました", Toast.LENGTH_SHORT).show();
+        db_system2 = MAX_PREMIUM_USE_COUNT;
+        isPremium = true;
+        loadRewardedAd();
+    }
+
+    //広告表示制御
+    public void AdViewActive(boolean flag){
+        visibleAd = flag;
+        if (!visibleAd){
+            // admob 非表示
+            mAdview.setVisibility(View.GONE);
+        } else {
+            // admob 表示
+            mAdview.setVisibility(View.VISIBLE);
+        }
+    }
+
 
     /**
      * OS関連処理
@@ -192,6 +283,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void MainScreenDisplay(){
 
+        //バナー広告表示
+        MobileAds.initialize(this);
+        mAdview = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdview.loadAd(adRequest);
+        //広告表示
+        AdViewActive(true);
+
         imageView = findViewById(R.id.imageView);
         txtResult = findViewById(R.id.txtResult);
         btnChooseImage = findViewById(R.id.btnChooseImage);
@@ -252,6 +351,9 @@ public class MainActivity extends AppCompatActivity {
     }
      */
     public void onOpenGallery(View v) {
+        //広告非表示
+        AdViewActive(false);
+
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // 複数選択を許可
@@ -273,6 +375,22 @@ public class MainActivity extends AppCompatActivity {
             analyzeImage();
             detectFaces();
         }*/
+
+        //広告表示
+        AdViewActive(true);
+
+        //プレミアム設定の減算
+        db_system2--;
+        if(db_system2 < 0){
+            db_system2 = 0;
+            if (isPremium == true) {
+                Context context = getApplicationContext();
+                Toast.makeText(context, "プレミアム設定は【無効】となりました", Toast.LENGTH_SHORT).show();
+                AllPremiumOff();
+                isPremium = false;
+            }
+        }
+
         if (isSelectNum){
             MaxSelectNum = 9;
         }
@@ -703,9 +821,11 @@ public class MainActivity extends AppCompatActivity {
         processNextImage();
     }
 
-
     /* --- 設定画面 --- */
     public void onSetup(View v){
+        //広告非表示
+        AdViewActive(false);
+
         setContentView(R.layout.activity_sub);
 
         SwFaceFrame = findViewById(R.id.face_frame);
@@ -719,6 +839,7 @@ public class MainActivity extends AppCompatActivity {
         SwFaceFrame.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 isFaceFrame = true;
+                isUsePremium();
             } else {
                 isFaceFrame = false;
             }
@@ -728,6 +849,7 @@ public class MainActivity extends AppCompatActivity {
         SwFaceMark.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 isFaceMark = true;
+                isUsePremium();
             } else {
                 isFaceMark = false;
             }
@@ -737,6 +859,7 @@ public class MainActivity extends AppCompatActivity {
         SwFaceHighMark.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 isFaceHighMark = true;
+                isUsePremium();
             } else {
                 isFaceHighMark = false;
             }
@@ -746,6 +869,7 @@ public class MainActivity extends AppCompatActivity {
         SwFaceValue.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 isFaceValue = true;
+                isUsePremium();
             } else {
                 isFaceValue = false;
             }
@@ -755,6 +879,7 @@ public class MainActivity extends AppCompatActivity {
         SwFaceHighSpeed.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 isAiHighSpeed = true;
+                isUsePremium();
             } else {
                 isAiHighSpeed = false;
             }
@@ -764,6 +889,7 @@ public class MainActivity extends AppCompatActivity {
         SwSelectionNum.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 isSelectNum = true;
+                isUsePremium();
             } else {
                 isSelectNum = false;
             }
@@ -776,6 +902,77 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         MainScreenDisplay();
+    }
+
+
+    public void AllPremiumOff(){
+
+//        isFaceFrame = false;
+//        SwFaceFrame.setChecked(false);
+//
+//        isFaceMark = false;
+//        SwFaceMark.setChecked(false);
+
+        isFaceHighMark = false;
+        SwFaceHighMark.setChecked(false);
+
+        isFaceValue = false;
+        SwFaceValue.setChecked(false);
+
+        isAiHighSpeed = false;
+        SwFaceHighSpeed.setChecked(false);
+
+        isSelectNum = false;
+        SwSelectionNum.setChecked(false);
+    }
+
+    public void isUsePremium(){
+
+        if (db_system2 > 0){
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("【プレミアム】を使用しますか？");
+        builder.setMessage("\n\n広告動画を視聴して「プレミアム」の設定を使用しますか？より高度な設定でスマイル診断をすることができます。" +
+                "\n\n【注意！】\nしばらく使用すると「プレミアム」の設定は無効になります、続けて「プレミアム」を利用する場合は再視聴下さい。" +
+                "\n\n\n [戻る] 画面を閉じる\n　　　(プレミアムは全てOFFとなります)" +
+                "\n\n [視聴] 広告動画を視聴する" +
+                "\n");
+
+        builder.setPositiveButton("視聴", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO Auto-generated method stub
+                //ダイアログ処理
+                //test_make
+                if (isRewardReadyGo == false){
+                    Context context = getApplicationContext();
+                    Toast.makeText(context, "準備中...しばらくして再度タップ下さい", Toast.LENGTH_SHORT).show();
+                    AllPremiumOff();
+                }
+                else{
+                    RdShow();
+                }
+            }
+        });
+
+        builder.setNeutralButton("戻る", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO Auto-generated method stub
+                /*
+                 *   処理なし（戻るだけ）
+                 * */
+                AllPremiumOff();
+
+                Context context = getApplicationContext();
+                Toast.makeText(context, "プレミアム設定は【無効】となりました", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setCancelable(false);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 
@@ -912,27 +1109,27 @@ public class MainActivity extends AppCompatActivity {
 
         if (isFaceHighMark) temp_int = 1;
         else                temp_int = 0;
-        temp_int = 0;   //test_make
+        //temp_int = 0;   //test_make
         insertValues.put("face_high_mark", temp_int);
 
         if (isFaceValue)    temp_int = 1;
         else                temp_int = 0;
-        temp_int = 0;   //test_make
+        //temp_int = 0;   //test_make
         insertValues.put("face_value", temp_int);
 
         if (isAiHighSpeed)  temp_int = 1;
         else                temp_int = 0;
-        temp_int = 0;   //test_make
+        //temp_int = 0;   //test_make
         insertValues.put("face_high_speed", temp_int);
 
         if (isSelectNum)    temp_int = 1;
         else                temp_int = 0;
-        temp_int = 0;   //test_make
+        //temp_int = 0;   //test_make
         insertValues.put("face_select_num", temp_int);
 
         if (isPremium)      temp_int = 1;
         else                temp_int = 0;
-        temp_int = 0;   //test_make
+        //temp_int = 0;   //test_make
         insertValues.put("premium_plan", temp_int);
 
         /*
