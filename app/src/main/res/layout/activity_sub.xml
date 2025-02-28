@@ -19,7 +19,6 @@
             android:orientation="vertical"
             android:padding="2dp">
 
-
             <ImageButton
                 android:id="@+id/image_back"
                 android:layout_width="wrap_content"
@@ -31,121 +30,118 @@
                 android:src="@drawable/back"
                 android:onClick="onBack"
                 android:background="@null"
-                android:contentDescription="戻るボタン"
+                android:contentDescription="@string/back_button"
                 android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                />
+                android:adjustViewBounds="true" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:background="@android:color/darker_gray"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"/>
+                android:layout_marginBottom="3dp" />
 
             <Switch
                 android:id="@+id/face_frame"
                 android:layout_width="match_parent"
                 android:layout_height="50sp"
-                android:text="顔認識枠表示"
+                android:text="@string/face_frame"
                 android:padding="10sp"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
             <TextView
                 android:id="@+id/explan_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="AIが認識した顔に枠囲みの表示をします"
+                android:text="@string/face_frame_description"
                 android:textSize="13sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:background="@android:color/darker_gray"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"/>
+                android:layout_marginBottom="3dp" />
 
             <Switch
                 android:id="@+id/face_mark"
                 android:layout_width="match_parent"
                 android:layout_height="50sp"
-                android:text="表情文字表示"
+                android:text="@string/face_mark"
                 android:padding="10sp"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
             <TextView
                 android:id="@+id/explan_2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="スマイルを文字で表記します"
+                android:text="@string/face_mark_description"
                 android:textSize="13sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:background="@android:color/darker_gray"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"/>
-
+                android:layout_marginBottom="3dp" />
 
             <Switch
                 android:id="@+id/face_high_mark"
                 android:layout_width="match_parent"
                 android:layout_height="50sp"
-                android:text="【プレミアム】スマイル段階表示"
+                android:text="@string/face_high_mark"
                 android:padding="10sp"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
             <TextView
                 android:id="@+id/explan_3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="スマイルの3段階表示、他の表情表示を行います"
+                android:text="@string/face_high_mark_description"
                 android:textSize="13sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:background="@android:color/darker_gray"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"/>
-
+                android:layout_marginBottom="3dp" />
 
             <Switch
                 android:id="@+id/face_value"
                 android:layout_width="match_parent"
                 android:layout_height="50sp"
-                android:text="【プレミアム】スマイル数値表示"
+                android:text="@string/face_value"
                 android:padding="10sp"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
             <TextView
                 android:id="@+id/explan_4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="スマイルを数値で表記します（50~100%）"
+                android:text="@string/face_value_description"
                 android:textSize="13sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:background="@android:color/darker_gray"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp"/>
+                android:layout_marginBottom="3dp" />
 
             <Switch
                 android:id="@+id/ai_high_speed"
                 android:layout_width="match_parent"
                 android:layout_height="50sp"
-                android:text="【プレミアム】AI解析高速化"
+                android:text="@string/ai_high_speed"
                 android:padding="10sp"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -155,7 +151,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="AIの解析スピードを高速化します"
+                android:text="@string/ai_high_speed_description"
                 android:textSize="13sp"
                 android:textStyle="bold"/>
             <View
@@ -169,40 +165,25 @@
                 android:id="@+id/selection_num"
                 android:layout_width="match_parent"
                 android:layout_height="50sp"
-                android:text="【プレミアム】画面選択枚数増加"
+                android:text="@string/selection_num"
                 android:padding="10sp"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/explan_6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/selection_num_description"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"/>
 
-
-        <TextView
-            android:id="@+id/explan_6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="画面選択の最大数を「3→9」に拡張します"
-            android:textSize="13sp"
-            android:textStyle="bold"/>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp"/>
-
-<!--
-<TextView
-    android:id="@+id/explan_7"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
-    android:padding="5dp"
-    android:text="\n今だけ【プレミアム】機能が使いたい放題です。ぜひお得なうちにご利用下さい。"
-    android:textSize="15sp"
-    android:textColor="#992222"
-    android:textStyle="bold"
--->
         </LinearLayout>
     </ScrollView>
 

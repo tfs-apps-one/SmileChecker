@@ -1,3 +1,28 @@
 <resources>
-    <string name="app_name">AIスマイル診断</string>
+    <string name="app_name">AI Face Smile Finder</string>
+
+    <string name="select_image">Select Image</string>
+    <string name="next_image">Next</string>
+
+    <string name="back_button">Back Button</string>
+    <string name="face_frame">Face Recognition Frame</string>
+    <string name="face_frame_description">Displays a frame around faces recognized by AI.</string>
+
+    <string name="face_mark">Expression Text Display</string>
+    <string name="face_mark_description">Displays smiles as text.</string>
+
+    <string name="face_high_mark">[Premium] Smile Level Display</string>
+    <string name="face_high_mark_description">Displays smiles in three levels and other facial expressions.</string>
+
+    <string name="face_value">[Premium] Smile Percentage Display</string>
+    <string name="face_value_description">Displays smile intensity as a percentage (50-100%).</string>
+
+    <string name="ai_high_speed">[Premium] AI Processing Speed Boost</string>
+    <string name="ai_high_speed_description">Speeds up AI analysis.</string>
+
+    <string name="selection_num">[Premium] Increase Image Selection Limit</string>
+    <string name="selection_num_description">Expands the maximum number of selectable images from 3 to 9.</string>
+
+    <string name="premium_promotion">For a limited time, enjoy all premium features for free. Take advantage of this special offer now!</string>
+
 </resources>

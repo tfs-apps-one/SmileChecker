@@ -47,6 +47,7 @@ import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
@@ -104,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Uri> imageUris = new ArrayList<>();
     private int currentIndex = 0;
     private int MaxSelectNum = 3;
+    private Locale _local;
+    private String _language;
     //広告
     private boolean visibleAd = true;
     private AdView mAdview;
@@ -123,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
+
+        _local = Locale.getDefault();
+        _language = _local.getLanguage();
 
         /***
         // 画面の高さを取得
@@ -186,8 +192,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void RdPresent() {
+        String _mess="";
+        if (_language.equals("ja")) {
+            _mess = "プレミアム設定は【有効】となりました";
+        }
+        else{
+            _mess = "Premium settings are now [enabled]";
+        }
         Context context = getApplicationContext();
-        Toast.makeText(context, "プレミアム設定は【有効】となりました", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, _mess, Toast.LENGTH_SHORT).show();
         db_system2 = MAX_PREMIUM_USE_COUNT;
         isPremium = true;
         loadRewardedAd();
@@ -311,10 +324,19 @@ public class MainActivity extends AppCompatActivity {
         star_3 = findViewById(R.id.result_3);
 
         ImageView imageView = findViewById(R.id.imageView);
+        String _mess="";
+        if (_language.equals("ja")) {
+            _mess = "画像を選択して下さい\n"+
+                    "結果はこちらに出力されます↓";
+        }
+        else{
+            _mess = "Please select an image\n" +
+                    "The results will be output here↓";
+        }
 
         if (mutableBitmap == null){
             imageView.setImageResource(R.drawable.sample);
-            face_result.setText("画像を選択して下さい\n結果はこちらに出力されます↓");
+            face_result.setText(_mess);
         }
         else{
             imageView.setImageBitmap(mutableBitmap); // 枠付き画像をセット
@@ -337,9 +359,17 @@ public class MainActivity extends AppCompatActivity {
             currentIndex++;
         }
 
+        String _mess="";
+        if (_language.equals("ja")) {
+            _mess = "すべての画像を処理しました";
+        }
+        else{
+            _mess = "All images processed";
+        }
+
         if (currentIndex >= imageUris.size()) {
             btnNextImage.setEnabled(false); // 最後の画像ならボタンを無効化
-            Toast.makeText(this, "すべての画像を処理しました", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, _mess, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -357,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // 複数選択を許可
-        startActivityForResult(Intent.createChooser(intent, "画像を選択"), PICK_IMAGES_REQUEST);
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGES_REQUEST);
     }
 
 
@@ -379,14 +409,22 @@ public class MainActivity extends AppCompatActivity {
         //広告表示
         AdViewActive(true);
 
+        String _mess="";
+        if (_language.equals("ja")) {
+            _mess = "プレミアム設定は【無効】となりました";
+        }
+        else{
+            _mess = "Premium settings are now [disabled]";
+        }
+
         //プレミアム設定の減算
         db_system2--;
         if(db_system2 < 0){
             db_system2 = 0;
             if (isPremium == true) {
                 Context context = getApplicationContext();
-                Toast.makeText(context, "プレミアム設定は【無効】となりました", Toast.LENGTH_SHORT).show();
-                AllPremiumOff();
+                Toast.makeText(context, _mess, Toast.LENGTH_SHORT).show();
+                AllPremiumOff(false);
                 isPremium = false;
             }
         }
@@ -437,6 +475,15 @@ public class MainActivity extends AppCompatActivity {
 
      */
     private void analyzeImage(Uri imgUri) {
+
+        String _mess="";
+        if (_language.equals("ja")) {
+            _mess = "画像の読み込みに失敗しました";
+        }
+        else{
+            _mess = "Failed to load image";
+        }
+
         if (imgUri == null) {
             return;
         }
@@ -451,10 +498,10 @@ public class MainActivity extends AppCompatActivity {
             ImageLabeler labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS);
             labeler.process(image)
                     .addOnSuccessListener(labels -> displayResults(labels))
-                    .addOnFailureListener(e -> txtResult.setText("判別失敗: " + e.getMessage()));
+                    .addOnFailureListener(e -> txtResult.setText("Error: " + e.getMessage()));
 
         } catch (IOException e) {
-            txtResult.setText("画像の読み込みに失敗しました");
+            txtResult.setText(_mess);
         }
     }
     private void displayResults(List<ImageLabel> labels) {
@@ -589,10 +636,30 @@ public class MainActivity extends AppCompatActivity {
     public void ResultSmile(){
 
         String message = "";
-
         float _percent = 0;
         float _smile = 0;
         float _human = 0;
+
+        String _mess1 ="";
+        String _mess2 ="";
+        String _mess3 ="";
+        String _mess4 ="";
+        String _mess5 ="";
+
+        if (_language.equals("ja")) {
+            _mess1 = "満点の【スマイル】です";
+            _mess2 = "多くの【スマイル】があります";
+            _mess3 = "少しの【スマイル】があります";
+            _mess4 = "【顔を検出できません】";
+            _mess5 = "【スマイル】がないかな？";
+        }
+        else{
+            _mess1 = "Full [smile]";
+            _mess2 = "Many [smile]";
+            _mess3 = "A little [smile]";
+            _mess4 = "Face cannot be detected !!";
+            _mess5 = "Is there no [smile] !?";
+        }
 
         if (human_num > 0 && smile_num > 0){
 
@@ -602,21 +669,21 @@ public class MainActivity extends AppCompatActivity {
             _percent = (_smile / _human);
 
             if (human_num == smile_num || _percent >= 1.0){
-                message = "満点の【スマイル】です";
+                message = _mess1;
 
                 star_1.setImageResource(R.drawable.star_ok);
                 star_2.setImageResource(R.drawable.star_ok);
                 star_3.setImageResource(R.drawable.star_ok);
             }
             else if(_percent >= 0.5){
-                message = "多くの【スマイル】があります";
+                message = _mess2;
 
                 star_1.setImageResource(R.drawable.star_ok);
                 star_2.setImageResource(R.drawable.star_ok);
                 star_3.setImageResource(R.drawable.star_ng2);
             }
             else{
-                message = "少しの【スマイル】があります";
+                message = _mess3;
 
                 star_1.setImageResource(R.drawable.star_ok);
                 star_2.setImageResource(R.drawable.star_ng2);
@@ -625,25 +692,37 @@ public class MainActivity extends AppCompatActivity {
         }
         else{
             if (human_num == 0) {
-                message = "【顔を検出できません】";
+                message = _mess4;
             }
             else{
-                message = "【スマイル】がないかな？";
+                message = _mess5;
             }
             star_1.setImageResource(R.drawable.star_ng2);
             star_2.setImageResource(R.drawable.star_ng2);
             star_3.setImageResource(R.drawable.star_ng2);
         }
         //共通部分
-        message +=
-                "\n"+
-                "\n　顔の検出　："+human_num+
-                "\n　スマイル　："+smile_num+
-                "\n　悲しい　　："+sad_num+
-                "\n　怒り・立腹："+angry_num+
-                "\n　興味・困惑："+curious_num+
-                "\n";
-                face_result.setText(message);
+        if (_language.equals("ja")) {
+            message +=
+                    "\n" +
+                    "\n　顔の検出　：" + human_num +
+                    "\n　スマイル　：" + smile_num +
+                    "\n　悲しい　　：" + sad_num +
+                    "\n　怒り・立腹：" + angry_num +
+                    "\n　興味・困惑：" + curious_num +
+                    "\n";
+        }
+        else{
+            message +=
+                    "\n" +
+                    "\n Face-----> " + human_num +
+                    "\n Smile----> " + smile_num +
+                    "\n Sad------> " + sad_num +
+                    "\n Anger----> " + angry_num +
+                    "\n Curious--> " + curious_num +
+                    "\n";
+        }
+        face_result.setText(message);
     }
 
 
@@ -718,14 +797,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //進捗ダイアログ
-    public static void showProgressDialog(Context context, int value) {
+    public void showProgressDialog(Context context, int value) {
+    //public static void showProgressDialog(Context context, int value) {
         // カスタムレイアウトを作成
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.dialog, null);
 
-        String title = "【 AI解析中... 】";
-        String message = "\n\n\n\n\n\n\nしばらくお待ちください\n\n\n\n\n\n";
 
+        String title = "";
+        String message = "";
+        if (_language.equals("ja")) {
+            title = "【 AI解析中... 】";
+            message = "\n\n\n\n\n\n\nしばらくお待ちください\n\n\n\n\n\n";
+        }
+        else{
+            title = "AI analysis in progress...";
+            message = "\n\n\n\n\n\n\nPlease wait a moment\n\n\n\n\n\n";
+        }
         // タイトルとメッセージをセット
         TextView titleView = view.findViewById(R.id.dialogTitle);
         TextView messageView = view.findViewById(R.id.dialogMessage);
@@ -751,19 +839,33 @@ public class MainActivity extends AppCompatActivity {
     //スクショ確認ダイアログ
     public void showScreenShotsDialog() {
 
-        String title = "【スクリーンショット】";
-        String message = "\n\n\n\n\n\n\n現在の判定結果を保存しますか？\n\n\n\n\n\n";
+        String title = "";
+        String message = "";
+        String btnOK = "";
+        String btnNG = "";
+        if (_language.equals("ja")) {
+            title = "【スクリーンショット】";
+            message = "\n\n\n\n\n\n\n現在の判定結果を保存しますか？\n\n\n\n\n\n";
+            btnOK = "はい";
+            btnNG = "いいえ";
+        }
+        else{
+            title = "ScreenShots";
+            message = "\n\n\n\n\n\n\nDo you want to save the current result ?\n\n\n\n\n\n";
+            btnOK = "YES";
+            btnNG = "NO";
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton("はい", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(btnOK, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ScreenShotsDone();
             }
         });
-        builder.setNegativeButton("いいえ", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(btnNG, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -775,29 +877,58 @@ public class MainActivity extends AppCompatActivity {
     //スクショ確認ダイアログ
     public void showInformationDialog() {
 
-        String title = "【アプリの使い方】";
-        String message =
-                        "\n"+
-                        "\n本アプリは「顔認識AI」を活用してスマイルを判定するアプリです。"+
-                        "\n例えば家族であるシーンを複数枚撮った時、この写真の内どの一枚が家族全員スマイルしているかを調べるのに便利です。"+
-                        "\n"+
-                        "\n【注意】"+
-                        "\nAIの判定結果は参考程度にご利用下さい。"+
-                        "\n"+
-                        "\n【使い方】"+
-                        "\nまずは画像を選択して下さい。選択後、AIが顔認識を行いスマイル度を判定します。"+
-                        "\n画像の複数枚選択機能は3枚(初期設定)までとなります。それ以上選択した場合は最初の3枚が優先されます。"+
-                        "\n"+
-                        "\n判定した結果はスクリーンショットとして保存することが出来ます。"+
-                        "\nアプリをもっと便利に使える設定もあります。設定画面を確認下さい。【プレミアム】の利用でより高度な機能を使うことが出来ます。"+
-                        "\n"+
-                        "\n"+
-                        "\n";
+        String btnOK = "";
+        String title = "";
+        String message = "";
+
+        if (_language.equals("ja")) {
+            btnOK = "閉じる";
+            title = "【アプリの使い方】";
+            message =
+                    "\n" +
+                    "\n本アプリは「顔認識AI」を活用してスマイルを判定するアプリです。" +
+                    "\n例えば家族であるシーンを複数枚撮った時、この写真の内どの一枚が家族全員スマイルしているかを調べるのに便利です。" +
+                    "\n" +
+                    "\n【注意】" +
+                    "\nAIの判定結果は参考程度にご利用下さい。" +
+                    "\n" +
+                    "\n【使い方】" +
+                    "\nまずは画像を選択して下さい。選択後、AIが顔認識を行いスマイル度を判定します。" +
+                    "\n画像の複数枚選択機能は3枚(初期設定)までとなります。それ以上選択した場合は最初の3枚が優先されます。" +
+                    "\n複数枚選択の機能が正しく動作しない場合、使用されている「写真選択アプリ」を変更頂くことで問題が解消する場合があります。" +
+                    "\n" +
+                    "\n判定した結果はスクリーンショットとして保存することが出来ます。" +
+                    "\nアプリをもっと便利に使える設定もあります。設定画面を確認下さい。【プレミアム】の利用でより高度な機能を使うことが出来ます。" +
+                    "\n" +
+                    "\n" +
+                    "\n";
+        }
+        else{
+            btnOK = "Close";
+            title = "[How to Use the App]";
+            message =
+                    "\n" +
+                    "\nThis app utilizes 'Face Recognition AI' to analyze smiles." +
+                    "\nFor example, if you take multiple photos of a family moment, this app helps determine which photo captures everyone smiling." +
+                    "\n" +
+                    "\n[Note]" +
+                    "\nPlease use the AI's judgment as a reference only." +
+                    "\n" +
+                    "\n[How to Use]" +
+                    "\nFirst, select an image. After selection, the AI will perform face recognition and evaluate the smile level." +
+                    "\nYou can select up to 3 images at a time (default setting). If more than 3 are selected, the first 3 images will be prioritized." +
+                    "\n" +
+                    "\nThe results can be saved as a screenshot." +
+                    "\nThere are additional settings to enhance your experience. Check the settings screen to customize your preferences. By using [Premium], you can unlock advanced features." +
+                    "\n" +
+                    "\n" +
+                    "\n";
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton("閉じる", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(btnOK, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -905,7 +1036,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void AllPremiumOff(){
+    public void AllPremiumOff(boolean isSwAction){
 
 //        isFaceFrame = false;
 //        SwFaceFrame.setChecked(false);
@@ -913,17 +1044,22 @@ public class MainActivity extends AppCompatActivity {
 //        isFaceMark = false;
 //        SwFaceMark.setChecked(false);
 
-        isFaceHighMark = false;
-        SwFaceHighMark.setChecked(false);
-
-        isFaceValue = false;
-        SwFaceValue.setChecked(false);
-
-        isAiHighSpeed = false;
-        SwFaceHighSpeed.setChecked(false);
-
-        isSelectNum = false;
-        SwSelectionNum.setChecked(false);
+        if (isSwAction) {
+            isFaceHighMark = false;
+            SwFaceHighMark.setChecked(false);
+            isFaceValue = false;
+            SwFaceValue.setChecked(false);
+            isAiHighSpeed = false;
+            SwFaceHighSpeed.setChecked(false);
+            isSelectNum = false;
+            SwSelectionNum.setChecked(false);
+        }
+        else{
+            isFaceHighMark = false;
+            isFaceValue = false;
+            isAiHighSpeed = false;
+            isSelectNum = false;
+        }
     }
 
     public void isUsePremium(){
@@ -932,24 +1068,60 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("【プレミアム】を使用しますか？");
-        builder.setMessage("\n\n広告動画を視聴して「プレミアム」の設定を使用しますか？より高度な設定でスマイル診断をすることができます。" +
-                "\n\n【注意！】\nしばらく使用すると「プレミアム」の設定は無効になります、続けて「プレミアム」を利用する場合は再視聴下さい。" +
-                "\n\n\n [戻る] 画面を閉じる\n　　　(プレミアムは全てOFFとなります)" +
-                "\n\n [視聴] 広告動画を視聴する" +
-                "\n");
+        String btnOK = "";
+        String btnNG = "";
+        String _mess1 = "";
+        String _mess2 = "";
 
-        builder.setPositiveButton("視聴", new DialogInterface.OnClickListener() {
+        if (_language.equals("ja")) {
+            btnOK = "視聴";
+            btnNG = "戻る";
+            _mess1 = "準備中...しばらくして再度タップ下さい";
+            _mess2 = "プレミアム設定は【無効】となりました";
+        }
+        else{
+            btnOK = "Watch";
+            btnNG = "Back";
+            _mess1 = "Preparing... Please wait and try tapping again later.";
+            _mess2 = "The Premium settings have been [disabled]";
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        if (_language.equals("ja")) {
+            builder.setTitle("【プレミアム】を使用しますか？");
+            builder.setMessage("\n\n広告動画を視聴して「プレミアム」の設定を使用しますか？より高度な設定でスマイル診断をすることができます。" +
+                    "\n\n【注意！】\nしばらく使用すると「プレミアム」の設定は無効になります、続けて「プレミアム」を利用する場合は再視聴下さい。" +
+                    "\n\n\n [戻る] 画面を閉じる\n (プレミアムは全てOFFとなります)" +
+                    "\n\n [視聴] 広告動画を視聴する" +
+                    "\n");
+        }
+        else{
+            builder.setTitle("Would you like to use [Premium]?");
+            builder.setMessage("\n\nWould you like to watch an ad video to enable the 'Premium' settings? You can perform a more advanced smile analysis with these settings." +
+                    "\n\n[Note!]\nThe 'Premium' settings will be disabled after a certain period. If you wish to continue using 'Premium', please watch the ad again." +
+                    "\n\n\n [Back] Close the screen\n (All Premium features will be turned OFF)" +
+                    "\n\n [Watch] Watch an ad video" +
+                    "\n");
+        }
+
+        builder.setPositiveButton(btnOK, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // TODO Auto-generated method stub
                 //ダイアログ処理
+
+                String _mess1 = "";
+                if (_language.equals("ja")) {
+                    _mess1 = "準備中...しばらくして再度タップ下さい";
+                }
+                else{
+                    _mess1 = "Preparing... Please wait and try tapping again later.";
+                }
+
                 //test_make
                 if (isRewardReadyGo == false){
                     Context context = getApplicationContext();
-                    Toast.makeText(context, "準備中...しばらくして再度タップ下さい", Toast.LENGTH_SHORT).show();
-                    AllPremiumOff();
+                    Toast.makeText(context, _mess1, Toast.LENGTH_SHORT).show();
+                    AllPremiumOff(true);
                 }
                 else{
                     RdShow();
@@ -957,17 +1129,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNeutralButton("戻る", new DialogInterface.OnClickListener(){
+        builder.setNeutralButton(btnNG, new DialogInterface.OnClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // TODO Auto-generated method stub
                 /*
                  *   処理なし（戻るだけ）
                  * */
-                AllPremiumOff();
+                String _mess2 = "";
+                if (_language.equals("ja")) {
+                    _mess2 = "プレミアム設定は【無効】となりました";
+                }
+                else{
+                    _mess2 = "The Premium settings have been [disabled]";
+                }
+
+                AllPremiumOff(true);
 
                 Context context = getApplicationContext();
-                Toast.makeText(context, "プレミアム設定は【無効】となりました", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, _mess2, Toast.LENGTH_SHORT).show();
             }
         });
         builder.setCancelable(false);
