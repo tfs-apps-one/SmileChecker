@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">AIスマイル診断</string>
+
+    <string name="select_image">画像を選択</string>
+    <string name="next_image">次へ</string>
+
+
+    <string name="back_button">戻るボタン</string>
+    <string name="face_frame">顔認識枠表示</string>
+    <string name="face_frame_description">AIが認識した顔に枠囲みの表示をします</string>
+
+    <string name="face_mark">表情文字表示</string>
+    <string name="face_mark_description">スマイルを文字で表記します</string>
+
+    <string name="face_high_mark">【プレミアム】スマイル段階表示</string>
+    <string name="face_high_mark_description">スマイルの3段階表示、他の表情表示を行います</string>
+
+    <string name="face_value">【プレミアム】スマイル数値表示</string>
+    <string name="face_value_description">スマイルを数値で表記します（50~100%）</string>
+
+    <string name="ai_high_speed">【プレミアム】AI解析高速化</string>
+    <string name="ai_high_speed_description">AIの解析スピードを高速化します</string>
+
+    <string name="selection_num">【プレミアム】画面選択枚数増加</string>
+    <string name="selection_num_description">画面選択の最大数を「3→9」に拡張します</string>
+
+    <string name="premium_promotion">今だけ【プレミアム】機能が使いたい放題です。ぜひお得なうちにご利用下さい。</string>
+
+</resources>
