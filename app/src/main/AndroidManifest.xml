@@ -12,9 +12,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/sc256"
+        android:icon="@drawable/sc2_512"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/sc256"
+        android:roundIcon="@drawable/sc2_512"
         android:supportsRtl="true"
         android:theme="@style/Theme.SmileChecker"
         tools:targetApi="31">

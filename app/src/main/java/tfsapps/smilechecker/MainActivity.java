@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean visibleAd = true;
     private AdView mAdview;
     public RewardedAd rewardedAd;
-    private int MAX_PREMIUM_USE_COUNT = 5;
+    private int MAX_PREMIUM_USE_COUNT = 9;
     private boolean isRewardReadyGo = false;
     //test_make
     // 本番ID 動画
