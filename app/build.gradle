@@ -13,11 +13,15 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
 
-    implementation 'com.google.android.gms:play-services-ads:23.2.0'
+    implementation 'com.google.android.gms:play-services-ads:25.1.0'
 
-    implementation 'com.google.mlkit:image-labeling:17.0.7'
+    implementation 'com.google.mlkit:image-labeling:17.0.9'
     implementation 'com.google.mlkit:vision-common:17.1.0'
-    implementation 'com.google.mlkit:face-detection:16.1.5' // 顔検出API
+    implementation 'com.google.mlkit:face-detection:16.1.7' // 顔検出API
+
+    // 16KB ページサイズ対応: ML Kit のネイティブライブラリの
+    // アラインメント問題を解決するためのワークアラウンド
+    implementation 'androidx.camera:camera-core:1.4.2'
 
 }
 
@@ -31,8 +35,8 @@ android {
         applicationId "tfsapps.smilechecker"
         minSdk 28
         targetSdk 35
-        versionCode 6
-        versionName "1.5"
+        versionCode 7
+        versionName "1.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
