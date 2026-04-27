@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bakground"
+    tools:context=".MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <!-- 戻るボタン -->
+            <ImageButton
+                android:id="@+id/best3_back"
+                android:layout_width="wrap_content"
+                android:layout_height="48sp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/back"
+                android:onClick="onBest3Back"
+                android:background="@null"
+                android:contentDescription="@string/back_button"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+
+            <!-- タイトル -->
+            <TextView
+                android:id="@+id/best3_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/best3_title"
+                android:textAlignment="center"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:padding="10dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp" />
+
+            <!-- 1位 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:layout_marginBottom="5dp">
+
+                <TextView
+                    android:id="@+id/best3_label_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/best3_rank1"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:padding="5dp" />
+
+                <ImageView
+                    android:id="@+id/best3_image_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:background="@android:color/darker_gray"
+                    android:padding="2dp" />
+
+                <TextView
+                    android:id="@+id/best3_score_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:padding="5dp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp" />
+
+            <!-- 2位 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:layout_marginBottom="5dp">
+
+                <TextView
+                    android:id="@+id/best3_label_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/best3_rank2"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:padding="5dp" />
+
+                <ImageView
+                    android:id="@+id/best3_image_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:background="@android:color/darker_gray"
+                    android:padding="2dp" />
+
+                <TextView
+                    android:id="@+id/best3_score_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:padding="5dp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp" />
+
+            <!-- 3位 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:layout_marginBottom="5dp">
+
+                <TextView
+                    android:id="@+id/best3_label_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/best3_rank3"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:padding="5dp" />
+
+                <ImageView
+                    android:id="@+id/best3_image_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:background="@android:color/darker_gray"
+                    android:padding="2dp" />
+
+                <TextView
+                    android:id="@+id/best3_score_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:padding="5dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
