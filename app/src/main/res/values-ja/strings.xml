@@ -26,4 +26,13 @@
 
     <string name="premium_promotion">今だけ【プレミアム】機能が使いたい放題です。ぜひお得なうちにご利用下さい。</string>
 
+    <string name="best3_button">ﾍﾞｽﾄ 3</string>
+    <string name="best3_title">🏆 スマイル ベスト３</string>
+    <string name="best3_rank1">🥇 1位</string>
+    <string name="best3_rank2">🥈 2位</string>
+    <string name="best3_rank3">🥉 3位</string>
+    <string name="best3_score">スコア: %s</string>
+    <string name="best3_no_data">スマイルデータがありません</string>
+    <string name="best3_no_photo">写真なし</string>
+
 </resources>

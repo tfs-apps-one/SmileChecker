@@ -25,4 +25,13 @@
 
     <string name="premium_promotion">For a limited time, enjoy all premium features for free. Take advantage of this special offer now!</string>
 
+    <string name="best3_button">Best 3</string>
+    <string name="best3_title">🏆 Smile Best 3</string>
+    <string name="best3_rank1">🥇 1st</string>
+    <string name="best3_rank2">🥈 2nd</string>
+    <string name="best3_rank3">🥉 3rd</string>
+    <string name="best3_score">Score: %s</string>
+    <string name="best3_no_data">No smile data available</string>
+    <string name="best3_no_photo">No Photo</string>
+
 </resources>
