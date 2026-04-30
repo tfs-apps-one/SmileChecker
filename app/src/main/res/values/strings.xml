@@ -34,4 +34,9 @@
     <string name="best3_no_data">No smile data available</string>
     <string name="best3_no_photo">No Photo</string>
 
+    <string name="ar_mode_button">AR Mode</string>
+    <string name="ar_camera_button">Camera</string>
+
+    <string name="perfect_smile_effect">🎉 Perfect Smile Yay!! 🎉</string>
+
 </resources>

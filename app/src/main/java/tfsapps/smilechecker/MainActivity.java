@@ -28,6 +28,8 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.DisplayMetrics;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,6 +61,10 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.AdError;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -117,6 +123,15 @@ public class MainActivity extends AppCompatActivity {
     private int MAX_PREMIUM_USE_COUNT = 9;
     private boolean isRewardReadyGo = false;
 
+    // インタースティシャル広告
+    private static final int FULLAD_REQUEST = 7;
+    private InterstitialAd mInterstitialAd;
+    // test_make
+    // 本番ID
+    private final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-4924620089567925/3451099963";
+    // テストID
+    //private final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712";
+
     // ベスト3用データ
     private ArrayList<SmileResult> smileResults = new ArrayList<>();
     private float currentSmileScore = 0f;
@@ -141,10 +156,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // test_make
-    // 本番ID 動画
+    // 本番ID 動画リワード
     private String AD_UNIT_ID = "ca-app-pub-4924620089567925/1332434981";
-    // テストID バナー
-//    private String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
+    // テストID 動画リワード
+    //private String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
+
+    // バナー広告
+    // 本番ID
+    private String AD_UNIT_ID_BANNER = "ca-app-pub-4924620089567925/5858003358";
+    // テストID
+    //private String AD_UNIT_ID_BANNER = "ca-app-pub-3940256099942544/6300978111";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,8 +190,16 @@ public class MainActivity extends AppCompatActivity {
          * imageView.setLayoutParams(params);
          ***/
 
+        // AdMob初期化
+        MobileAds.initialize(this, initializationStatus -> {
+        });
+        // バナー広告の読み込み
+        loadBanner();
+
         // 動画リワード
         loadRewardedAd();
+        // インタースティシャル広告
+        loadInterstitialAd();
 
         MainScreenDisplay();
     }
@@ -201,9 +230,48 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // インタースティシャル広告のロード
+    private void loadInterstitialAd() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        InterstitialAd.load(this, INTERSTITIAL_AD_UNIT_ID, adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        mInterstitialAd = interstitialAd;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        mInterstitialAd = null;
+                    }
+                });
+    }
+
     public void RdShow() {
         if (rewardedAd != null) {
             Activity activityContext = MainActivity.this;
+
+            rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    // Called when ad is shown.
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(AdError adError) {
+                    rewardedAd = null;
+                    isRewardReadyGo = false;
+                    loadRewardedAd();
+                }
+
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    rewardedAd = null;
+                    isRewardReadyGo = false;
+                    loadRewardedAd();
+                }
+            });
+
             rewardedAd.show(activityContext, new OnUserEarnedRewardListener() {
                 @Override
                 public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
@@ -229,18 +297,49 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(context, _mess, Toast.LENGTH_SHORT).show();
         db_system2 = MAX_PREMIUM_USE_COUNT;
         isPremium = true;
-        loadRewardedAd();
+    }
+
+    // バナー広告（アダプティブ）のロード
+    private void loadBanner() {
+        mAdview = new AdView(this);
+        mAdview.setAdUnitId(AD_UNIT_ID_BANNER);
+
+        FrameLayout adContainerView = findViewById(R.id.adContainerView);
+        if (adContainerView != null) {
+            adContainerView.removeAllViews();
+            adContainerView.addView(mAdview);
+
+            AdSize adSize = getAdSize();
+            mAdview.setAdSize(adSize);
+
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdview.loadAd(adRequest);
+        }
+    }
+
+    private AdSize getAdSize() {
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+
+        float widthPixels = outMetrics.widthPixels;
+        float density = outMetrics.density;
+
+        int adWidth = (int) (widthPixels / density);
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
     }
 
     // 広告表示制御
     public void AdViewActive(boolean flag) {
         visibleAd = flag;
-        if (!visibleAd) {
-            // admob 非表示
-            mAdview.setVisibility(View.GONE);
-        } else {
-            // admob 表示
-            mAdview.setVisibility(View.VISIBLE);
+        if (mAdview != null) {
+            if (!visibleAd) {
+                // admob 非表示
+                mAdview.setVisibility(View.GONE);
+            } else {
+                // admob 表示
+                mAdview.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -270,6 +369,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        if (mAdview != null) {
+            mAdview.resume();
+        }
         /*
          * //サブスク
          * //BillingClientを初期化
@@ -304,6 +406,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
+        if (mAdview != null) {
+            mAdview.pause();
+        }
         super.onPause();
     }
 
@@ -316,6 +421,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        if (mAdview != null) {
+            mAdview.destroy();
+        }
         super.onDestroy();
         // if (billingClient != null){
         // billingClient.endConnection();
@@ -323,13 +431,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void MainScreenDisplay() {
-
-        // バナー広告表示
-        MobileAds.initialize(this);
-        mAdview = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdview.loadAd(adRequest);
-        // 広告表示
+        // 広告表示状態の更新
         AdViewActive(true);
 
         imageView = findViewById(R.id.imageView);
@@ -381,9 +483,9 @@ public class MainActivity extends AppCompatActivity {
             Uri imageUri = imageUris.get(currentIndex);
             imageView.setImageURI(imageUri); // 画像を表示
 
-            int _time = 1700;
+            int _time = 1300;
             if (isAiHighSpeed)
-                _time = 1100;
+                _time = 900;
             showProgressDialog(this, _time);
             ResetSmileCheckerNum();
             analyzeImage(imageUri);
@@ -933,6 +1035,7 @@ public class MainActivity extends AppCompatActivity {
                     "\n" +
                     "\n【注意】" +
                     "\nAIの判定結果は参考程度にご利用下さい。" +
+                    "\n判定に使用する画像データはすべて【オフライン】で処理されます、外部サーバーへの送信はありませんので安心してご利用下さい。" +
                     "\n" +
                     "\n【使い方】" +
                     "\nまずは画像を選択して下さい。選択後、AIが顔認識を行いスマイル度を判定します。" +
@@ -941,6 +1044,10 @@ public class MainActivity extends AppCompatActivity {
                     "\n" +
                     "\n判定した結果はスクリーンショットとして保存することが出来ます。" +
                     "\nアプリをもっと便利に使える設定もあります。設定画面を確認下さい。【プレミアム】の利用でより高度な機能を使うことが出来ます。" +
+                    "\n" +
+                    "\n【カメラモード】" +
+                    "\n本モードはカメラの撮影画面でスマイル判定を行います。笑顔満点の写真を撮影する際の参考値としてアプリの笑顔数値をご利用下さい。" +
+                    "\n画面下中央にあるカメラボタンをタップすると、スマホ端末のデフォルトカメラアプリを使用することが出来ます。" +
                     "\n" +
                     "\n" +
                     "\n";
@@ -954,6 +1061,7 @@ public class MainActivity extends AppCompatActivity {
                     "\n" +
                     "\n[Note]" +
                     "\nPlease use the AI's judgment as a reference only." +
+                    "\nAll image data used for the assessment is processed offline; no data is sent to external servers, so please use the service with confidence." +
                     "\n" +
                     "\n[How to Use]" +
                     "\nFirst, select an image. After selection, the AI will perform face recognition and evaluate the smile level."
@@ -964,6 +1072,10 @@ public class MainActivity extends AppCompatActivity {
                     "\nThe results can be saved as a screenshot." +
                     "\nThere are additional settings to enhance your experience. Check the settings screen to customize your preferences. By using [Premium], you can unlock advanced features."
                     +
+                    "\n" +
+                    "\n[Camera Mode]" +
+                    "\nThis mode detects smiles on the camera's shooting screen. Please use the app's smile value as a reference when taking photos with a perfect smile." +
+                    "\nTapping the camera button in the bottom center of the screen will allow you to use your smartphone's default camera app." +
                     "\n" +
                     "\n" +
                     "\n";
@@ -1082,6 +1194,48 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return "\n Face: " + result.humanNum + "  Smile: " + result.smileNum;
         }
+    }
+
+    /* --- ARモード画面 --- */
+    public void onArMode(View v) {
+        db_system3++;
+        if (db_system3 == (FULLAD_REQUEST - 1)) {
+            Toast.makeText(this, "もう少し使用すると全面広告が表示されます", Toast.LENGTH_SHORT).show();
+        }
+
+        if (db_system3 >= FULLAD_REQUEST && mInterstitialAd != null) {
+            mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    mInterstitialAd = null;
+                    db_system3 = 0;
+                    loadInterstitialAd();
+                    startArModeActivity();
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(AdError adError) {
+                    mInterstitialAd = null;
+                    db_system3 = 0;
+                    startArModeActivity();
+                }
+            });
+            mInterstitialAd.show(this);
+        } else {
+            if (db_system3 >= FULLAD_REQUEST) {
+                db_system3 = 0;
+            }
+            startArModeActivity();
+        }
+    }
+
+    private void startArModeActivity() {
+        Intent intent = new Intent(this, ArModeActivity.class);
+        intent.putExtra("isFaceFrame", isFaceFrame);
+        intent.putExtra("isFaceMark", isFaceMark);
+        intent.putExtra("isFaceHighMark", isFaceHighMark);
+        intent.putExtra("isFaceValue", isFaceValue);
+        startActivity(intent);
     }
 
     /* --- 設定画面 --- */

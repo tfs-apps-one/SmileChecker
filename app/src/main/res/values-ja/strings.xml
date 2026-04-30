@@ -35,4 +35,9 @@
     <string name="best3_no_data">スマイルデータがありません</string>
     <string name="best3_no_photo">写真なし</string>
 
+    <string name="ar_mode_button">ARモード</string>
+    <string name="ar_camera_button">カメラ</string>
+
+    <string name="perfect_smile_effect">🎉 笑顔満点やったー！！ 🎉</string>
+
 </resources>
