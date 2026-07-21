@@ -597,6 +597,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MyScreenShots.REQUEST_WRITE_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                // 権限が許可されたのでスクリーンショット保存を再実行
+                MyScreenShots.takeScreenshotAndSave(this);
+            } else {
+                Toast.makeText(this, "ストレージへのアクセスが許可されなかったため、保存できませんでした。", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     /*
      * イメージ１枚の処理
      * private void analyzeImage() {

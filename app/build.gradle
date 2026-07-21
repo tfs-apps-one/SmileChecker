@@ -33,14 +33,14 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     namespace 'tfsapps.smilechecker'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "tfsapps.smilechecker"
         minSdk 28
-        targetSdk 35
-        versionCode 9
-        versionName "1.8"
+        targetSdk 36
+        versionCode 10
+        versionName "1.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
